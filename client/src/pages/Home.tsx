@@ -16,9 +16,9 @@ import {
   ScanSearch,
 } from "lucide-react";
 
-const LOGO_URL = "/manus-storage/pneumasim-logo_42e92c26.png";
-const HERO_URL = "/manus-storage/pneumasim-hero_02a4d74e.png";
-const FEATURES_URL = "/manus-storage/pneumasim-features_057a3382.png";
+const LOGO_URL = "/pneumasim-logo.png";
+const HERO_URL = "/pneumasim-hero.png";
+const FEATURES_URL = "/pneumasim-features.png";
 
 const capabilities = [
   {

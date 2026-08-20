@@ -32,7 +32,7 @@ import { COMP_DEFS } from "@/lib/pneusim/defs";
 import { resetSim } from "@/lib/pneusim/engine";
 import type { Cartouche, CircuitDoc, Component } from "@/lib/pneusim/types";
 
-const LOGO_URL = "/manus-storage/pneumasim-logo_42e92c26.png";
+const LOGO_URL = "/pneumasim-logo.png";
 
 interface Props {
   statusTxt: string;

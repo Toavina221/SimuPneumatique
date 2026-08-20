@@ -15,7 +15,7 @@ import {
   type Exercise,
 } from "@/lib/pneusim/exercises";
 
-const LOGO_URL = "/manus-storage/pneumasim-logo_42e92c26.png";
+const LOGO_URL = "/pneumasim-logo.png";
 
 // ── validation automatique ───────────────────────────────────────────
 function internalBidirLinks(c: { type: string }): { a: string; b: string }[] {

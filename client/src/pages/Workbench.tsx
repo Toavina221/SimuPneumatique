@@ -34,7 +34,7 @@ const VALVE_TYPES = [
   "valve53_open",
 ];
 
-const LOGO_URL = "/manus-storage/pneumasim-logo_42e92c26.png";
+const LOGO_URL = "/pneumasim-logo.png";
 
 export default function Workbench() {
   const ctx = useCircuit();
