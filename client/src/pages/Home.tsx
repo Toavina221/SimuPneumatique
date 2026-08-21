@@ -60,13 +60,12 @@ export default function Home() {
           <a href="#composants" className="hover:text-[#dfe8f2] transition-colors">{t('nav_components')}</a>
           <a href="#methode" className="hover:text-[#dfe8f2] transition-colors">{t('nav_method')}</a>
           <div className="flex items-center gap-2 ml-4 border-l border-[#26333f] pl-4">
-            {/* a enlever lors d'integration des langues anglaise */}
             {/* <button 
               onClick={() => setLang('fr')} 
               className={`text-[11px] ${lang === 'fr' ? 'text-[#ff6a3d] font-bold' : 'text-[#5d7189] hover:text-[#dfe8f2]'}`}
             >{t('lang_fr')}</button>
-            <span className="text-[#26333f]">|</span> */}
-            {/* <button 
+            <span className="text-[#26333f]">|</span>
+            <button 
               onClick={() => setLang('en')} 
               className={`text-[11px] ${lang === 'en' ? 'text-[#ff6a3d] font-bold' : 'text-[#5d7189] hover:text-[#dfe8f2]'}`}
             >{t('lang_en')}</button> */}
