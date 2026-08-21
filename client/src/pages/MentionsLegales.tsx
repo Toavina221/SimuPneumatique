@@ -23,9 +23,9 @@ export default function MentionsLegales() {
               dans le cadre de sa réalisation et de son suivi :
             </p>
             <ul className="mt-4 space-y-2 list-disc list-inside">
-              <li><strong>Propriétaire du site :</strong> Toavina NASOLOMPIANINA</li>
+              <li><strong>Propriétaire du site :</strong> Rovamampionina Toavina</li>
               <li><strong>Contact :</strong> helpscannerapk@gmail.com</li>
-              <li><strong>Directeur de la publication :</strong> Toavina NASOLOMPIANINA</li>
+              <li><strong>Directeur de la publication :</strong> Rovamampionina Toavina</li>
             </ul>
           </section>
 
@@ -41,7 +41,7 @@ export default function MentionsLegales() {
           <section>
             <h2 className="text-[#dfe8f2] text-xl font-bold mb-4">3. Propriété intellectuelle</h2>
             <p>
-              Toavina NASOLOMPIANINA est propriétaire des droits de propriété intellectuelle ou détient les droits d’usage 
+              Rovamampionina Toavina est propriétaire des droits de propriété intellectuelle ou détient les droits d’usage 
               sur tous les éléments accessibles sur le site internet, notamment les textes, images, graphismes, logos, 
               vidéos, architecture, icônes et sons.
             </p>
@@ -61,6 +61,16 @@ export default function MentionsLegales() {
           </section>
         </div>
       </main>
+
+      {/* Signature Auteur */}
+      <div className="py-8 text-center border-t border-[#26333f]/30 bg-[#0d1219]/50">
+        <span className="text-[9px] uppercase tracking-[0.3em] text-[#5d7189] font-medium opacity-50">
+          Conçu et développé par
+        </span>
+        <div className="mt-1 text-2xl font-normal text-[#ff6a3d]" style={{ fontFamily: "'Caveat', cursive" }}>
+          Rovamampionina Toavina
+        </div>
+      </div>
 
       <footer className="border-t border-[#26333f] px-6 py-8 text-center font-mono text-[11px] text-[#5d7189]">
         © 2026 PNEUMASIM · TOUS DROITS RÉSERVÉS

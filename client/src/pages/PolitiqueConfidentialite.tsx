@@ -64,6 +64,16 @@ export default function PolitiqueConfidentialite() {
         </div>
       </main>
 
+      {/* Signature Auteur */}
+      <div className="py-8 text-center border-t border-[#26333f]/30 bg-[#0d1219]/50">
+        <span className="text-[9px] uppercase tracking-[0.3em] text-[#5d7189] font-medium opacity-50">
+          Conçu et développé par
+        </span>
+        <div className="mt-1 text-2xl font-normal text-[#ff6a3d]" style={{ fontFamily: "'Caveat', cursive" }}>
+          Rovamampionina Toavina
+        </div>
+      </div>
+
       <footer className="border-t border-[#26333f] px-6 py-8 text-center font-mono text-[11px] text-[#5d7189]">
         © 2026 PNEUMASIM · PROTECTION DES DONNÉES
       </footer>

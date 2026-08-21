@@ -204,6 +204,16 @@ export default function ExercisePage() {
             ))}
           </div>
         </main>
+        {/* Signature Auteur */}
+        <div className="py-8 text-center border-t border-[#26333f]/30 bg-[#0d1219]/50">
+          <span className="text-[9px] uppercase tracking-[0.3em] text-[#5d7189] font-medium opacity-50">
+            Conçu et développé par
+          </span>
+          <div className="mt-1 text-2xl font-normal text-[#ff6a3d]" style={{ fontFamily: "'Caveat', cursive" }}>
+            Rovamampionina Toavina
+          </div>
+        </div>
+
         <footer className="border-t border-[#26333f] px-5 py-4 text-center text-[11px] text-[#5d7189] font-mono">
           PNEUMASIM · Conventions de schéma ISO 1219 · Feuille 1600 × 1000
         </footer>

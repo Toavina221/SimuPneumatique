@@ -342,6 +342,16 @@ export default function Home() {
         />
       </div>
 
+      {/* ── Signature Auteur ────────────────────────────── */}
+      <div className="py-10 text-center border-t border-[#26333f]/30 bg-[#0d1219]/50">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-[#5d7189] font-medium opacity-50">
+          Conçu et développé par
+        </span>
+        <div className="mt-2 text-3xl font-normal text-[#ff6a3d]" style={{ fontFamily: "'Caveat', cursive" }}>
+          Rovamampionina Toavina
+        </div>
+      </div>
+
       {/* ── Pied de page ─────────────────────────────────── */}
       <footer className="px-6 lg:px-12 py-7 border-t border-[#26333f] flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] text-[#5d7189]">
         <div className="flex items-center gap-2">

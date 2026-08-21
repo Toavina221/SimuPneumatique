@@ -294,6 +294,11 @@ export default function Workbench() {
             </div>
           </div>
 
+          <div className="px-3 py-4 border-t border-[#26333f]/30 text-center">
+            <span className="text-[9px] uppercase tracking-[0.2em] text-[#5d7189] opacity-40">Auteur</span>
+            <div className="text-[18px] font-normal text-[#ff6a3d] mt-0.5" style={{ fontFamily: "'Caveat', cursive" }}>Rovamampionina Toavina</div>
+          </div>
+
           <div className="px-3 pb-4 pt-2">
             <div className="flex flex-col gap-2">
               <Link
