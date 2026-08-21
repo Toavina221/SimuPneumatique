@@ -16,9 +16,9 @@ import {
   ScanSearch,
 } from "lucide-react";
 
-const LOGO_URL = "/pneumasim-logo.png";
-const HERO_URL = "/pneumasim-hero.png";
-const FEATURES_URL = "/pneumasim-features.png";
+const LOGO_URL = "/manus-storage/pneumasim-logo_42e92c26.png";
+const HERO_URL = "/manus-storage/pneumasim-hero_02a4d74e.png";
+const FEATURES_URL = "/manus-storage/pneumasim-features_057a3382.png";
 
 const capabilities = [
   {
@@ -316,8 +316,8 @@ export default function Home() {
         <ins
           className="adsbygoogle"
           style={{ display: "block" }}
-          data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-          data-ad-slot="NNNNNNNN"
+          data-ad-client="ca-pub-7281717868974793"
+          data-ad-slot=""
           data-ad-format="auto"
           data-full-width-responsive="true"
         />

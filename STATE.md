@@ -263,3 +263,7 @@ Drag palette OK (wrap [draggable] + dragstart + window drop avec DataTransfer 'c
 Résultat : fil V1:A→c_2:A créé, touche 1 = appui vanne, pos cyl-prop monte à 0.75 en 1.5s (vs 1.0 pour le double-effet A1=0.19 à 2s après relâche — vitesse différente OK). Le cyl-prop descend à 0 au relâché (vidange, descente ×2).
 NB : le clavier '1' toggle la 1re vanne du doc (keydown). E2E complet validé.
 Prochaines étapes : (1) vérifier le rendu du cyl-prop (barre proportionnelle) visuellement — screenshot, (2) screenshots finaux landing/éditeur/exercice, (3) checkpoint + livraison avec mention des 3 features.
+16:22 — simu-pneumatique.vercel.app sert server/index.ts en texte brut = déploiement main ancien. L'utilisateur doit pusher la branche vercel-deploy (ZIP livré) et basculer production sur vercel-deploy.
+16:40 — Vercel OK : simu-pneumatique.vercel.app affiche PneumaSim (landing + /editeur + /exercice). Root cause résolue : commentaire dans vercel.json (remplacé par JSON strict). Utilisateur passe à AdSense.
+16:42 — AdSense intégré : client ca-pub-7281717868974793 dans client/index.html, client/public/ads.txt créé.
+16:45 — AdSense IDs réels appliqués dans Home.tsx + Workbench.tsx (data-ad-slot vide = slot sans nom, annonce adaptative).

@@ -8,7 +8,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>PneumaSim — Éditeur &amp; simulateur de circuits pneumatiques</title>
     <meta name="description" content="Simulez des circuits pneumatiques directement dans le navigateur : distributeurs, vérins, régulateurs et capteurs réagissent en temps réel selon les conventions ISO 1219." />
-    <link rel="icon" type="image/png" href="/pneumasim-logo.png" />
+    <link rel="icon" type="image/png" href="/manus-storage/pneumasim-logo_42e92c26.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -17,10 +17,13 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- AdSense : remplacer "ca-pub-XXXXXXXXXXXXXXXX" par votre ID AdSense avant la mise en production -->
+    <script
+      defer
+      src="%VITE_ANALYTICS_ENDPOINT%/umami"
+      data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
     <script
       async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7281717868974793"
       crossorigin="anonymous"></script>
   </body>
 

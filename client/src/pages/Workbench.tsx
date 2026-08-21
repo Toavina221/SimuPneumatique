@@ -34,7 +34,7 @@ const VALVE_TYPES = [
   "valve53_open",
 ];
 
-const LOGO_URL = "/pneumasim-logo.png";
+const LOGO_URL = "/manus-storage/pneumasim-logo_42e92c26.png";
 
 export default function Workbench() {
   const ctx = useCircuit();
@@ -240,8 +240,8 @@ export default function Workbench() {
               <ins
                 className="adsbygoogle"
                 style={{ display: "block" }}
-                data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                data-ad-slot="NNNNNNNN"
+                data-ad-client="ca-pub-7281717868974793"
+                data-ad-slot=""
                 data-ad-format="fluid"
                 data-ad-layout-key="-6+0+22-23"
               />
