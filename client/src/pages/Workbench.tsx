@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import { useTranslation } from "@/lib/i18n";
 import { toast } from "sonner";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import {
@@ -21,6 +22,7 @@ import PerformanceGraph from "@/components/pneusim/PerformanceGraph";
 import { CompPropertyModal, CartoucheModal } from "@/components/pneusim/PropertyModal";
 import IsoTooltip from "@/components/pneusim/IsoTooltip";
 import { useCircuit } from "@/lib/pneusim/useCircuit";
+import { exportToPdf } from "@/lib/pneusim/pdfExport";
 import { EXAMPLES, getExample } from "@/lib/pneusim/exampleDocs";
 import { zoomAt } from "@/lib/pneusim/geometry";
 import type { Cartouche, Component } from "@/lib/pneusim/types";
@@ -43,6 +45,7 @@ const VALVE_TYPES = [
 const LOGO_URL = "/manus-storage/pneumasim-logo_42e92c26.png";
 
 export default function Workbench() {
+  const { t } = useTranslation();
   const ctx = useCircuit();
   const {
     doc,
@@ -73,7 +76,9 @@ export default function Workbench() {
     | null
   >(null);
   const [showGraph, setShowGraph] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const graphRef = useRef<HTMLDivElement>(null);
 
   // ── Menu Exemples ──────────────────────────────────────────────
   const loadExample = useCallback(
@@ -173,6 +178,25 @@ export default function Workbench() {
   // enregistrer handleFitView dans la ref utilisée au chargement initial
   fitViewRef.current = handleFitView;
 
+  const { lang } = useTranslation();
+  const handleExportPdf = async () => {
+    if (!svgRef.current) return;
+    
+    setIsExporting(true);
+    const isFr = lang === 'fr';
+    toast.info(isFr ? "Génération du rapport PDF..." : "Generating PDF report...");
+    
+    try {
+      await exportToPdf(svgRef.current, doc, showGraph ? graphRef.current : null);
+      toast.success(isFr ? "Rapport PDF exporté" : "PDF report exported");
+    } catch (err) {
+      console.error(err);
+      toast.error(isFr ? "Erreur lors de l'export PDF" : "Error during PDF export");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const selectedComp = selected ? doc.components.find((c) => c.id === selected) : undefined;
 
   return (
@@ -213,6 +237,8 @@ export default function Workbench() {
             updateComponent(target.id, { fault });
             toast.error(`Panne détectée : ${target.num || target.id} (${fault === "leak" ? "fuite" : "blocage"})`);
           }}
+          onExportPdf={handleExportPdf}
+          isExporting={isExporting}
         />
       <div className="flex-1 flex min-h-0">
         {/* palette */}
@@ -269,12 +295,18 @@ export default function Workbench() {
           </div>
 
           <div className="px-3 pb-4 pt-2">
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 text-[11px] text-[#5d7189] hover:text-[#4aa8ff] transition-colors"
-            >
-              <ArrowLeft className="h-3 w-3" /> Retour à l'accueil
-            </Link>
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/"
+                className="flex items-center gap-1.5 text-[11px] text-[#5d7189] hover:text-[#4aa8ff] transition-colors"
+              >
+                <ArrowLeft className="h-3 w-3" /> Retour à l'accueil
+              </Link>
+              <div className="flex gap-3 text-[10px] text-[#5d7189] font-mono mt-1">
+                <Link href="/mentions-legales" className="hover:text-[#ff6a3d] transition-colors">LÉGAL</Link>
+                <Link href="/confidentialite" className="hover:text-[#ff6a3d] transition-colors">PRIVACY</Link>
+              </div>
+            </div>
           </div>
         </div>
         {/* feuille */}
@@ -325,7 +357,7 @@ export default function Workbench() {
             className="absolute left-3 bottom-2.5 max-w-[520px] rounded-md border border-[#2f3f4f] px-3 py-2 text-[11.5px] font-mono leading-relaxed pointer-events-none"
             style={{ background: "rgba(14,21,31,0.94)", color: "#c3d2e2" }}
           >
-            <span className="text-[#4aa8ff]">Glissez</span> un composant depuis la palette • <span className="text-[#4aa8ff]">cliquez</span> un port pour tracer une liaison • <span className="text-[#4aa8ff]">double-clic</span> = propriétés • <span className="text-[#4aa8ff]">molette</span> = zoom • <span className="text-[#4aa8ff]">glisser</span> le fond = déplacer la vue • <span className="text-[#4aa8ff]">R</span> = pivoter • <span className="text-[#4aa8ff]">Suppr</span> = effacer
+            {t('editor_help')}
           </div>
         </div>
       </div>

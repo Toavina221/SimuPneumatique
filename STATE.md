@@ -272,3 +272,5 @@ Prochaines étapes : (1) vérifier le rendu du cyl-prop (barre proportionnelle) 
 17:10 — SEO : robots.txt et sitemap.xml vérifiés en ligne.
 17:20 — Bibliothèque enrichie : 12 nouveaux composants ISO 1219 (total 37) incluant FRL, Venturi, vérin sans tige, distributeurs 4/2, 4/3, etc. Logique de simulation et rendus SVG intégrés.
 17:45 — Bibliothèque, Oscilloscope et Mode Diagnostic implémentés.
+18:00 — Pages légales (Mentions Légales, Confidentialité) ajoutées.
+18:15 — Google Analytics, Lazy Loading et Support Multilingue (FR/EN) ajoutés.

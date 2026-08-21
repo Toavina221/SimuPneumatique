@@ -4,6 +4,7 @@
 // de composants et CTA vers l'éditeur. Palette ardoise + orange pression.
 
 import { Link } from "wouter";
+import { useTranslation } from "@/lib/i18n";
 import {
   AirVent,
   ArrowRight,
@@ -60,6 +61,8 @@ const components = [
 ];
 
 export default function Home() {
+  const { lang, setLang, t } = useTranslation();
+
   return (
     <div
       className="min-h-screen flex flex-col"
@@ -73,10 +76,21 @@ export default function Home() {
           <span className="hidden sm:inline-block h-2 w-2 rounded-full bg-[#ff6a3d] shadow-[0_0_6px_#ff6a3d]" />
         </div>
         <nav className="hidden md:flex items-center gap-7 text-[13px] text-[#8296ab]">
-          <Link href="/bibliotheque" className="hover:text-[#dfe8f2] transition-colors">Bibliothèque</Link>
-          <a href="#capacites" className="hover:text-[#dfe8f2] transition-colors">Capacités</a>
-          <a href="#composants" className="hover:text-[#dfe8f2] transition-colors">Composants</a>
-          <a href="#methode" className="hover:text-[#dfe8f2] transition-colors">Méthode</a>
+          <Link href="/bibliotheque" className="hover:text-[#dfe8f2] transition-colors">{t('nav_library')}</Link>
+          <a href="#capacites" className="hover:text-[#dfe8f2] transition-colors">{t('nav_capabilities')}</a>
+          <a href="#composants" className="hover:text-[#dfe8f2] transition-colors">{t('nav_components')}</a>
+          <a href="#methode" className="hover:text-[#dfe8f2] transition-colors">{t('nav_method')}</a>
+          <div className="flex items-center gap-2 ml-4 border-l border-[#26333f] pl-4">
+            <button 
+              onClick={() => setLang('fr')} 
+              className={`text-[11px] ${lang === 'fr' ? 'text-[#ff6a3d] font-bold' : 'text-[#5d7189] hover:text-[#dfe8f2]'}`}
+            >FR</button>
+            <span className="text-[#26333f]">|</span>
+            <button 
+              onClick={() => setLang('en')} 
+              className={`text-[11px] ${lang === 'en' ? 'text-[#ff6a3d] font-bold' : 'text-[#5d7189] hover:text-[#dfe8f2]'}`}
+            >EN</button>
+          </div>
         </nav>
         <Link
           href="/editeur"
@@ -99,34 +113,32 @@ export default function Home() {
             Atelier virtuel de pneumatique
           </p>
           <h1 className="text-4xl lg:text-6xl font-bold leading-[1.08] tracking-tight">
-            Câblez. Testez.
+            {lang === 'fr' ? 'Câblez. Testez.' : 'Wire. Test.'}
             <br />
-            Validez vos automatismes <span className="text-[#ff6a3d]">sans risque.</span>
+            {lang === 'fr' ? 'Validez vos automatismes ' : 'Validate your systems '}
+            <span className="text-[#ff6a3d]">{lang === 'fr' ? 'sans risque.' : 'without risk.'}</span>
           </h1>
           <p className="mt-6 text-[16px] leading-relaxed text-[#8296ab] max-w-xl">
-            Concevez et simulez vos circuits pneumatiques en quelques clics,
-            directement dans le navigateur : distributions ISO 1219, vérins,
-            régulateurs et capteurs réagissent en temps réel — sans installation,
-            sans logiciel de CAO.
+            {t('hero_subtitle')}
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
             <Link
               href="/editeur"
               className="inline-flex items-center gap-2 bg-[#ff6a3d] hover:bg-[#ff7d56] text-white px-6 py-3 rounded-lg text-[14px] font-bold transition-colors active:scale-[0.97]"
             >
-              <Play className="h-4 w-4" fill="white" /> Ouvrir l'éditeur
+              <Play className="h-4 w-4" fill="white" /> {t('btn_open_editor')}
             </Link>
             <Link
               href="/bibliotheque"
               className="inline-flex items-center gap-2 border border-[#ff6a3d]/50 hover:border-[#ff6a3d] text-[#ff6a3d] px-6 py-3 rounded-lg text-[14px] font-bold transition-colors active:scale-[0.97]"
             >
-              <Layers className="h-4 w-4" /> Voir les schémas types
+              <Layers className="h-4 w-4" /> {t('btn_view_examples')}
             </Link>
             <a
               href="#capacites"
               className="inline-flex items-center gap-2 border border-[#2f3f4f] hover:border-[#4aa8ff] text-[#dfe8f2] px-6 py-3 rounded-lg text-[14px] transition-colors"
             >
-              Découvrir les capacités
+              {t('btn_discover')}
             </a>
           </div>
           <div className="mt-10 flex flex-wrap gap-x-8 gap-y-2 font-mono text-[12px] text-[#5d7189] border-l-2 border-[#ff6a3d]/50 pl-4">
@@ -334,12 +346,14 @@ export default function Home() {
       <footer className="px-6 lg:px-12 py-7 border-t border-[#26333f] flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] text-[#5d7189]">
         <div className="flex items-center gap-2">
           <img src={LOGO_URL} alt="" className="h-4 w-4" />
-          PNEUMASIM — Éditeur &amp; simulateur de circuits pneumatiques
+          {t('footer_text')}
         </div>
-        <div className="flex gap-4">
-          <Link href="/bibliotheque" className="hover:text-[#ff6a3d] transition-colors">BIBLIOTHÈQUE</Link>
-          <Link href="/exercice" className="hover:text-[#ff6a3d] transition-colors">EXERCICES</Link>
-          <Link href="/editeur" className="hover:text-[#ff6a3d] transition-colors">SIMULATEUR</Link>
+        <div className="flex flex-wrap gap-4">
+          <Link href="/bibliotheque" className="hover:text-[#ff6a3d] transition-colors">{t('nav_library').toUpperCase()}</Link>
+          <Link href="/exercice" className="hover:text-[#ff6a3d] transition-colors">{t('nav_exercises').toUpperCase()}</Link>
+          <Link href="/editeur" className="hover:text-[#ff6a3d] transition-colors">{t('nav_simulator').toUpperCase()}</Link>
+          <Link href="/mentions-legales" className="hover:text-[#ff6a3d] transition-colors">{t('legal_mentions')}</Link>
+          <Link href="/confidentialite" className="hover:text-[#ff6a3d] transition-colors">{t('legal_privacy')}</Link>
         </div>
         <div>Conventions de schéma ISO 1219 · Feuille 1600 × 1000 · Zones 100 px</div>
       </footer>

@@ -24,11 +24,15 @@ import {
   Play,
   RotateCw,
   RotateCcw,
-  Save,
-  Trash2,
+  Download,
+  Star,
   Activity,
   AlertTriangle,
+  FileOutput,
+  Save,
+  Trash2,
 } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 import { downloadJson, downloadSvg, readJsonFile } from "@/lib/pneusim/io";
 import { COMP_DEFS } from "@/lib/pneusim/defs";
 import { resetSim } from "@/lib/pneusim/engine";
@@ -59,6 +63,8 @@ interface Props {
   onToggleGraph: () => void;
   showGraph: boolean;
   onDiagnostic: () => void;
+  onExportPdf?: () => void;
+  isExporting?: boolean;
 }
 
 interface Favorite {
@@ -88,6 +94,7 @@ function saveFavorites(list: Favorite[]) {
 }
 
 export default function Toolbar(props: Props) {
+  const { lang, t } = useTranslation();
   const {
     statusTxt,
     simRunning,
@@ -109,6 +116,8 @@ export default function Toolbar(props: Props) {
     onToggleGraph,
     showGraph,
     onDiagnostic,
+    onExportPdf,
+    isExporting,
   } = props;
   const fileRef = useRef<HTMLInputElement>(null);
   const [favorites, setFavorites] = useState<Favorite[]>(loadFavorites);
@@ -213,7 +222,7 @@ export default function Toolbar(props: Props) {
         disabled={simRunning}
         className="bg-[#ff6a3d] border border-[#ff6a3d] text-white px-2.5 py-1.5 rounded-md text-[12.5px] font-semibold hover:bg-[#ff7d56] disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97] transition-colors flex items-center gap-1.5"
       >
-        <Play className="h-3.5 w-3.5" fill="white" /> Simuler
+        <Play className="h-3.5 w-3.5" fill="white" /> {t('nav_simulator')}
       </button>
       <button
         type="button"
@@ -290,14 +299,14 @@ export default function Toolbar(props: Props) {
           showGraph ? "text-[#ff6a3d] border-[#ff6a3d] bg-[#ff6a3d]/10" : "text-[#dfe8f2] hover:bg-[#20303f] hover:border-[#2c6aa3]"
         }`}
       >
-        <Activity className="h-3.5 w-3.5" /> Oscillo
+        <Activity className="h-3.5 w-3.5" /> {t('toolbar_oscillo')}
       </button>
       <button
         type="button"
         onClick={onDiagnostic}
         className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#ff5d5d] hover:text-[#ff5d5d] flex items-center gap-1.5"
       >
-        <AlertTriangle className="h-3.5 w-3.5" /> Diagnostic
+        <AlertTriangle className="h-3.5 w-3.5" /> {t('toolbar_diagnostic')}
       </button>
       <span className="w-px h-[22px] bg-[#2f3f4f] mx-1" />
       <button
@@ -308,22 +317,22 @@ export default function Toolbar(props: Props) {
         }}
         className="bg-[#1a2432] flex items-center gap-1.5 border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#2c6aa3]"
       >
-        <Save className="h-3.5 w-3.5" /> Enregistrer
+        <Save className="h-3.5 w-3.5" /> {t('toolbar_save')}
       </button>
       {favoriteMenu}
       <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
         <DialogTrigger asChild />
         <DialogContent className="bg-[#141c27] border-[#2f3f4f] text-[#dfe8f2]">
           <DialogHeader>
-            <DialogTitle className="text-[14px]">Enregistrer aux favoris</DialogTitle>
+            <DialogTitle className="text-[14px]">{t('toolbar_save')}</DialogTitle>
             <DialogDescription className="text-[12px] text-[#5d7189]">
-              Le schéma actuel sera conservé dans ce navigateur.
+              {lang === 'fr' ? 'Le schéma actuel sera conservé dans ce navigateur.' : 'Current schematic will be kept in this browser.'}
             </DialogDescription>
           </DialogHeader>
           <Input
             value={saveName}
             onChange={(e) => setSaveName(e.target.value)}
-            placeholder="Nom du schéma"
+            placeholder={lang === 'fr' ? 'Nom du schéma' : 'Schematic name'}
             autoFocus
             onKeyDown={(e) => {
               if (e.key === "Enter") commitSaveFavorite();
@@ -331,10 +340,10 @@ export default function Toolbar(props: Props) {
           />
           <div className="flex justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => setSaveOpen(false)}>
-              Annuler
+              {lang === 'fr' ? 'Annuler' : 'Cancel'}
             </Button>
             <Button size="sm" onClick={commitSaveFavorite}>
-              Enregistrer
+              {t('toolbar_save')}
             </Button>
           </div>
         </DialogContent>
@@ -344,7 +353,7 @@ export default function Toolbar(props: Props) {
         onClick={() => fileRef.current?.click()}
         className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#2c6aa3] flex items-center gap-1.5"
       >
-        <FolderInput className="h-3.5 w-3.5" /> Charger
+        <FolderInput className="h-3.5 w-3.5" /> {t('toolbar_load')}
       </button>
       <input
         ref={fileRef}
@@ -378,14 +387,11 @@ export default function Toolbar(props: Props) {
       />
       <button
         type="button"
-        onClick={() => {
-          if (!svgEl) return;
-          downloadSvg(svgEl, onGetDoc().cartouche.titre);
-          toast.success("Feuille exportée (.svg)");
-        }}
-        className="bg-[#1a2432] flex items-center gap-1.5 border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#2c6aa3]"
+        disabled={isExporting}
+        onClick={onExportPdf}
+        className="bg-[#1a2432] flex items-center gap-1.5 border border-[#2f3f4f] text-[#ff6a3d] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#ff6a3d]/10 hover:border-[#ff6a3d] disabled:opacity-50"
       >
-        <Image className="h-3.5 w-3.5" /> Export SVG
+        <FileOutput className="h-3.5 w-3.5" /> {isExporting ? (lang === 'fr' ? 'Export...' : 'Exporting...') : (lang === 'fr' ? 'Rapport PDF' : 'PDF Report')}
       </button>
       <div className="flex-1" />
       <span className="text-[11px] font-mono mr-2" style={{ color: simRunning ? "#4ade80" : "#8296ab" }}>
