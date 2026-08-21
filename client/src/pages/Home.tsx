@@ -70,6 +70,7 @@ export default function Home() {
               className={`text-[11px] ${lang === 'en' ? 'text-[#ff6a3d] font-bold' : 'text-[#5d7189] hover:text-[#dfe8f2]'}`}
             >{t('lang_en')}</button> */}
           </div>
+          {/*  */}
         </nav>
         <Link
           href="/editeur"
