@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { COMP_DEFS, todayStr } from "./defs";
 import { tick, resetSim, computePressurized, computeSignals } from "./engine";
 import type { Cartouche, CircuitDoc, Component, SimResult, Wire } from "./types";
+import { getL } from "../i18n";
 
 let UID = 1;
 export function uid(prefix: string): string {
@@ -34,12 +35,12 @@ export function makeEmptyDoc(titre = "Sans titre"): CircuitDoc {
   return {
     components: [],
     wires: [],
-    cartouche: { titre, auteur: "", date: todayStr(), folio: "1/1" },
+    cartouche: { titre, auteur: "", date: todayStr, folio: "1/1" },
     counters: {},
   };
 }
 
-export function useCircuit(initial?: CircuitDoc) {
+export function useCircuit(initial?: CircuitDoc, lang: 'fr' | 'en' = 'en') {
   const [doc, setDoc] = useState<CircuitDoc>(() => initial ?? makeEmptyDoc());
   const [selected, setSelected] = useState<string | null>(null);
   const [simRunning, setSimRunning] = useState(false);
@@ -47,7 +48,7 @@ export function useCircuit(initial?: CircuitDoc) {
   const [view, setView] = useState<ViewBox>({ x: 0, y: 0, w: SHEET_W, h: SHEET_H });
   const [simResult, setSimResult] = useState<SimResult>({ pressurized: new Set(), signals: new Set() });
   const [, setFrame] = useState(0);
-  const [statusTxt, setStatusTxt] = useState("Édition");
+  const [statusTxt, setStatusTxt] = useState(lang === 'fr' ? "Édition" : "Editing");
 
   const docRef = useRef(doc);
   docRef.current = doc;
@@ -174,20 +175,20 @@ export function useCircuit(initial?: CircuitDoc) {
 
   const startSim = useCallback(() => {
     setSimRunning(true);
-    setStatusTxt("Simulation en cours");
-  }, []);
+    setStatusTxt(lang === 'fr' ? "Simulation en cours" : "Simulation running");
+  }, [lang]);
 
   const pauseSim = useCallback(() => {
     setSimRunning(false);
-    setStatusTxt("Édition (pause)");
-  }, []);
+    setStatusTxt(lang === 'fr' ? "Édition (pause)" : "Editing (paused)");
+  }, [lang]);
 
   const reset = useCallback(() => {
     resetSim(docRef.current);
     setSimRunning(false);
     setSimResult({ pressurized: new Set(), signals: new Set() });
-    setStatusTxt("Édition");
-  }, []);
+    setStatusTxt(lang === 'fr' ? "Édition" : "Editing");
+  }, [lang]);
 
   const isPressurized = useCallback(
     (key: string): boolean => simResult.pressurized.has(key),

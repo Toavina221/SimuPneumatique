@@ -41,8 +41,11 @@ export interface Exercise {
   id: string;
   num: string;
   label: string;
+  label_en: string;
   description: string;
+  description_en: string;
   hint: string;
+  hint_en: string;
   /** nombre de fils manquants approximatif, affiché en indice */
   missingCount: number;
   start: CircuitDoc;
@@ -75,9 +78,12 @@ export const EXERCISES: Exercise[] = [
       id: "capteur-debranche",
       num: "E-1",
       label: "Le capteur débranché",
+      label_en: "The Disconnected Sensor",
       description:
         "La mémoire bistable est presque complète : le vérin sort sous l'ordre de S2, mais il ne revient jamais. Il manque la liaison du capteur de sortie vers la deuxième entrée de pilotage. Trouvez-la et branchez-la.",
+      description_en: "The bistable memory is almost complete: the cylinder extends under S2's command, but it never returns. The link from the output sensor to the second pilot input is missing. Find it and connect it.",
       hint: "Le capteur S1 surveille le vérin sorti. Pour le faire revenir, son signal doit atteindre l'entrée Y2 du distributeur V1 (signal de pilotage pointillé).",
+      hint_en: "Sensor S1 monitors the extended cylinder. To make it return, its signal must reach input Y2 of valve V1 (dotted pilot signal).",
       missingCount: 1,
       start: { components: comps, wires, cartouche: { titre: "Exercice 1 — Mémoire bistable incomplète", auteur: "", date: "", folio: "E-1" }, counters: {} },
       target: {
@@ -111,9 +117,12 @@ export const EXERCISES: Exercise[] = [
       id: "alimentation-coupee",
       num: "E-2",
       label: "L'alimentation coupée",
+      label_en: "The Cut-off Supply",
       description:
         "Le démarrage lent est monté mais rien ne bouge : le temporisateur n'est relié à rien. Alimentez-le depuis la source, puis appuyez sur V1 au clavier : le vérin sortira après le délai réglé.",
+      description_en: "The slow start is set up but nothing moves: the timer is not connected to anything. Supply it from the source, then press V1 on the keyboard: the cylinder will extend after the set delay.",
       hint: "Le temporisateur T1 est un composant pneumatique : il a une entrée IN (air) et une sortie OUT (air). Reliez la source P1 à l'entrée IN : après le délai, OUT pressurise B du vérin. La sortie A de V1 (déjà branchée à A du vérin) pilote le signal Y1 de T1.",
+      hint_en: "Timer T1 is a pneumatic component: it has an IN input (air) and an OUT output (air). Connect source P1 to the IN input: after the delay, OUT pressurizes B of the cylinder. Output A of V1 (already connected to A of the cylinder) pilots signal Y1 of T1.",
       missingCount: 1,
       start: { components: comps, wires, cartouche: { titre: "Exercice 2 — Temporisation non alimentée", auteur: "", date: "", folio: "E-2" }, counters: {} },
       target: {
@@ -136,9 +145,12 @@ export const EXERCISES: Exercise[] = [
       id: "raccordement-complet",
       num: "E-3",
       label: "Le raccordement complet",
+      label_en: "The Complete Connection",
       description:
         "La commande directe d'un vérin simple effet : source, distributeur 3/2 et vérin sont posés sur la feuille, mais aucun fil n'est tracé. Reliez le tout pour pouvoir actionner le vérin.",
+      description_en: "Direct control of a single-acting cylinder: source, 3/2 valve, and cylinder are placed on the sheet, but no wires are traced. Connect everything to be able to actuate the cylinder.",
       hint: "Deux conduites suffisent : la source P1 vers l'entrée P du distributeur, puis la sortie A du distributeur vers l'entrée A du vérin. Appuyez sur V1 au clavier pour tester.",
+      hint_en: "Two lines are enough: source P1 to input P of the valve, then output A of the valve to input A of the cylinder. Press V1 on the keyboard to test.",
       missingCount: 2,
       start: { components: comps, wires: [], cartouche: { titre: "Exercice 3 — Raccordement direct", auteur: "", date: "", folio: "E-3" }, counters: {} },
       target: {

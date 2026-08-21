@@ -6,6 +6,7 @@
 import { getDef } from "@/lib/pneusim/engine";
 import type { Component } from "@/lib/pneusim/types";
 import { getComp } from "./editorStore";
+import { useTranslation } from "@/lib/i18n";
 
 interface Props {
   comp: Component;
@@ -27,6 +28,7 @@ const COL = {
 };
 
 export default function CompSymbol({ comp }: Props) {
+  const { lang } = useTranslation();
   const def = getDef(comp.type);
   if (!def) return null;
 
@@ -225,7 +227,7 @@ export default function CompSymbol({ comp }: Props) {
         <>
           <path d="M0,0 L34,0 L44,17 L34,34 L0,34 Z" fill={COL.panel2} stroke={COL.line2} strokeWidth={1.4} />
           <circle cx={17} cy={17} r={7} fill="none" stroke={COL.textDim} strokeWidth={1.4} />
-          <text x={10} y={52} textAnchor="middle" fill={COL.textDim2} fontSize={8} fontFamily="monospace">OU</text>
+          <text x={10} y={52} textAnchor="middle" fill={COL.textDim2} fontSize={8} fontFamily="monospace">{lang === 'fr' ? 'OU' : 'OR'}</text>
         </>
       );
     case "dualpressure":
@@ -235,7 +237,7 @@ export default function CompSymbol({ comp }: Props) {
           <text x={17} y={21} textAnchor="middle" fontFamily="monospace" fontSize={11} fill={COL.textDim}>
             &amp;
           </text>
-          <text x={10} y={52} textAnchor="middle" fill={COL.textDim2} fontSize={8} fontFamily="monospace">ET</text>
+          <text x={10} y={52} textAnchor="middle" fill={COL.textDim2} fontSize={8} fontFamily="monospace">{lang === 'fr' ? 'ET' : 'AND'}</text>
         </>
       );
     case "sensor": {
@@ -248,7 +250,9 @@ export default function CompSymbol({ comp }: Props) {
           <circle cx={17} cy={15} r={4.5} fill={col} />
           <text x={17} y={-3} textAnchor="middle" fill={COL.textDim2} fontSize={8} fontFamily="monospace">
             {target ? target.num : "?"}{" "}
-            {comp.params.position === "extended" ? "sorti" : "rentré"}
+            {comp.params.position === "extended" 
+              ? (lang === 'fr' ? "sorti" : "extended") 
+              : (lang === 'fr' ? "rentré" : "retracted")}
           </text>
         </>
       );
@@ -398,7 +402,9 @@ export default function CompSymbol({ comp }: Props) {
           <ellipse cx={28} cy={22} rx={24} ry={16} fill={COL.panel2} stroke={pA ? COL.pressurized : COL.line2} strokeWidth={1.6} />
           <line x1={28} y1={6} x2={28} y2={38} stroke={COL.textDim} strokeWidth={1} />
           <path d="M8,22 q20,-8 40,0" fill="none" stroke={COL.textDim} strokeWidth={1} />
-          <text x={28} y={-4} textAnchor="middle" fill={COL.textDim2} fontSize={8} fontFamily="monospace">Z·Réservoir</text>
+          <text x={28} y={-4} textAnchor="middle" fill={COL.textDim2} fontSize={8} fontFamily="monospace">
+            {lang === 'fr' ? 'Z·Réservoir' : 'Z·Receiver'}
+          </text>
         </>
       );
     case "filter":

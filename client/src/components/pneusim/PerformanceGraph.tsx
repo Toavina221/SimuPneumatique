@@ -13,7 +13,10 @@ interface PerformanceGraphProps {
   onClose: () => void;
 }
 
+import { useTranslation } from "@/lib/i18n";
+
 export default function PerformanceGraph({ components, pressurized, isOpen, onClose }: PerformanceGraphProps) {
+  const { lang } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const historyRef = useRef<Record<string, number[]>>({});
   const [monitored, setMonitored] = useState<string[]>([]);
@@ -109,7 +112,7 @@ export default function PerformanceGraph({ components, pressurized, isOpen, onCl
       <div className="flex items-center justify-between px-3 py-2 border-b border-[#26333f] bg-[#1a2431]">
         <div className="flex items-center gap-2">
           <Activity className="h-3.5 w-3.5 text-[#ff6a3d]" />
-          <span className="text-[11px] font-bold uppercase tracking-wider">Oscilloscope Temps Réel</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider">{lang === 'fr' ? 'Oscilloscope Temps Réel' : 'Real-time Oscilloscope'}</span>
         </div>
         <Button variant="ghost" size="icon" className="h-6 w-6 text-[#5d7189]" onClick={onClose}>
           <X className="h-4 w-4" />
@@ -141,7 +144,9 @@ export default function PerformanceGraph({ components, pressurized, isOpen, onCl
         </div>
         
         <p className="mt-3 text-[9px] text-[#5d7189] leading-tight italic">
-          Affiche la position (0-1) des actionneurs sélectionnés. L'axe X représente le temps (env. 5s glissantes).
+          {lang === 'fr' 
+            ? "Affiche la position (0-1) des actionneurs sélectionnés. L'axe X représente le temps (env. 5s glissantes)."
+            : "Displays position (0-1) of selected actuators. X-axis represents time (approx. 5s sliding window)."}
         </p>
       </div>
     </div>

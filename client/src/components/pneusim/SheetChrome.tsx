@@ -93,12 +93,15 @@ export function FrameLayer() {
   );
 }
 
+import { useTranslation } from "@/lib/i18n";
+
 interface CartoucheProps {
   cartouche: Cartouche;
   onEdit: (field: keyof Cartouche) => void;
 }
 
 export function CartoucheLayer({ cartouche, onEdit }: CartoucheProps) {
+  const { lang } = useTranslation();
   const band = 22;
   const rowH = 34;
   const h = rowH * 2;
@@ -117,7 +120,7 @@ export function CartoucheLayer({ cartouche, onEdit }: CartoucheProps) {
         onDoubleClick={() => onEdit("auteur")}
       >
         <rect x={0} y={0} width={leftW} height={rowH} fill="transparent" />
-        <text x={10} y={13} fontSize={7} fill="#5d7189" letterSpacing={0.5} fontFamily="monospace">AUTEUR</text>
+        <text x={10} y={13} fontSize={7} fill="#5d7189" letterSpacing={0.5} fontFamily="monospace">{lang === 'fr' ? 'AUTEUR' : 'AUTHOR'}</text>
         <text x={90} y={23} fontSize={11} fill="#dfe8f2" fontFamily="monospace">{escXml(cartouche.auteur || "—")}</text>
       </g>
       <g
@@ -135,7 +138,7 @@ export function CartoucheLayer({ cartouche, onEdit }: CartoucheProps) {
         onDoubleClick={() => onEdit("titre")}
       >
         <rect x={leftW} y={0} width={fullW - leftW} height={rowH} fill="transparent" />
-        <text x={leftW + 8} y={13} fontSize={7} fill="#5d7189" letterSpacing={0.5} fontFamily="monospace">TITRE</text>
+        <text x={leftW + 8} y={13} fontSize={7} fill="#5d7189" letterSpacing={0.5} fontFamily="monospace">{lang === 'fr' ? 'TITRE' : 'TITLE'}</text>
         <text x={leftW + 8} y={23} fontSize={14} fill="#4aa8ff" fontWeight={700} fontFamily="monospace">
           {escXml(cartouche.titre)}
         </text>

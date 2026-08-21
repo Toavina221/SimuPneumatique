@@ -45,8 +45,8 @@ const VALVE_TYPES = [
 const LOGO_URL = "/manus-storage/pneumasim-logo_42e92c26.png";
 
 export default function Workbench() {
-  const { t } = useTranslation();
-  const ctx = useCircuit();
+  const { lang, t } = useTranslation();
+  const ctx = useCircuit(undefined, lang);
   const {
     doc,
     selected,
@@ -178,7 +178,6 @@ export default function Workbench() {
   // enregistrer handleFitView dans la ref utilisée au chargement initial
   fitViewRef.current = handleFitView;
 
-  const { lang } = useTranslation();
   const handleExportPdf = async () => {
     if (!svgRef.current) return;
     
@@ -187,7 +186,7 @@ export default function Workbench() {
     toast.info(isFr ? "Génération du rapport PDF..." : "Generating PDF report...");
     
     try {
-      await exportToPdf(svgRef.current, doc, showGraph ? graphRef.current : null);
+      await exportToPdf(svgRef.current, doc, lang, showGraph ? graphRef.current : null);
       toast.success(isFr ? "Rapport PDF exporté" : "PDF report exported");
     } catch (err) {
       console.error(err);
@@ -197,7 +196,7 @@ export default function Workbench() {
     }
   };
 
-  const selectedComp = selected ? doc.components.find((c) => c.id === selected) : undefined;
+  const selectedComp = doc.components.find((c) => c.id === selected);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#0d1219", color: "#dfe8f2" }}>
@@ -235,7 +234,11 @@ export default function Workbench() {
             const target = comps[Math.floor(Math.random() * comps.length)];
             const fault = Math.random() > 0.5 ? "leak" : "block";
             updateComponent(target.id, { fault });
-            toast.error(`Panne détectée : ${target.num || target.id} (${fault === "leak" ? "fuite" : "blocage"})`);
+            const isFr = lang === 'fr';
+            toast.error(isFr 
+              ? `Panne détectée : ${target.num || target.id} (${fault === "leak" ? "fuite" : "blocage"})`
+              : `Fault detected: ${target.num || target.id} (${fault === "leak" ? "leak" : "blockage"})`
+            );
           }}
           onExportPdf={handleExportPdf}
           isExporting={isExporting}
@@ -249,7 +252,7 @@ export default function Workbench() {
           <div className="flex items-center gap-2 px-3 py-2.5 border-b border-[#26333f]">
             <img src={LOGO_URL} alt="" className="h-5 w-5" />
             <span className="text-[11px] uppercase tracking-[0.8px] text-[#8296ab] font-bold">
-              Composants
+              {t('label_components')}
             </span>
           </div>
           <Palette />
@@ -257,31 +260,30 @@ export default function Workbench() {
             <div className="px-3 pb-3">
               <DropdownMenu>
                 <DropdownMenuTrigger className="w-full border border-dashed border-[#ff6a3d]/50 hover:border-[#ff6a3d] hover:bg-[#ff6a3d]/[0.06] rounded-md px-3 py-2 text-[11px] font-medium text-[#ff6a3d] transition-colors active:scale-[0.98] flex items-center justify-between gap-2">
-                  <span>⟲ Charger un exemple</span>
+                  <span>⟲ {t('btn_examples')}</span>
                   <ChevronDown className="h-3 w-3 flex-none" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" side="top" className="w-[300px] max-h-[360px] overflow-y-auto">
                   <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.1em] text-[#5d7189]">
-                    Circuits d'exemples
+                    {t('library_title')}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {EXAMPLES.map((ex) => (
                     <DropdownMenuItem key={ex.id} onClick={() => loadExample(ex.id)} className="flex flex-col items-start gap-0.5 py-2">
-                      <span className="text-[12px] font-medium text-[#dfe8f2]">{ex.label}</span>
-                      <span className="text-[11px] leading-snug text-[#5d7189]">{ex.description}</span>
+                      <span className="text-[12px] font-medium text-[#dfe8f2]">{lang === 'fr' ? ex.label : ex.label_en}</span>
+                      <span className="text-[11px] leading-snug text-[#5d7189]">{lang === 'fr' ? ex.description : ex.description_en}</span>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
-          {/* Bannière publicitaire (bloc d'annonces AdSense — remplacer les IDs) */}
+          {/* Bannière publicitaire */}
           <div className="px-3 pb-2 pt-4">
             <div
               id="ad-slot-workbench"
               className="border border-dashed border-[#26333f] rounded-md px-3 py-4 text-center font-mono text-[10px] text-[#5d7189]"
             >
-              {/* AdSense : insérer ici le <ins class="adsbygoogle"> une fois votre ID AdSense configuré */}
               <ins
                 className="adsbygoogle"
                 style={{ display: "block" }}
@@ -290,12 +292,12 @@ export default function Workbench() {
                 data-ad-format="fluid"
                 data-ad-layout-key="-6+0+22-23"
               />
-              Publicité
+              Publicité / Ads
             </div>
           </div>
 
           <div className="px-3 py-4 border-t border-[#26333f]/30 text-center">
-            <span className="text-[9px] uppercase tracking-[0.2em] text-[#5d7189] opacity-40">Auteur</span>
+            <span className="text-[9px] uppercase tracking-[0.2em] text-[#5d7189] opacity-40">{t('label_author')}</span>
             <div className="text-[18px] font-normal text-[#ff6a3d] mt-0.5" style={{ fontFamily: "'Caveat', cursive" }}>Rovamampionina Toavina</div>
           </div>
 
@@ -305,11 +307,11 @@ export default function Workbench() {
                 href="/"
                 className="flex items-center gap-1.5 text-[11px] text-[#5d7189] hover:text-[#4aa8ff] transition-colors"
               >
-                <ArrowLeft className="h-3 w-3" /> Retour à l'accueil
+                <ArrowLeft className="h-3 w-3" /> {t('label_back_home')}
               </Link>
               <div className="flex gap-3 text-[10px] text-[#5d7189] font-mono mt-1">
-                <Link href="/mentions-legales" className="hover:text-[#ff6a3d] transition-colors">LÉGAL</Link>
-                <Link href="/confidentialite" className="hover:text-[#ff6a3d] transition-colors">PRIVACY</Link>
+                <Link href="/mentions-legales" className="hover:text-[#ff6a3d] transition-colors">{t('nav_legal')}</Link>
+                <Link href="/confidentialite" className="hover:text-[#ff6a3d] transition-colors">{t('nav_privacy')}</Link>
               </div>
             </div>
           </div>
@@ -346,15 +348,15 @@ export default function Workbench() {
           >
             <div className="flex items-center gap-2">
               <div className="h-[3px] w-[18px] rounded-sm" style={{ background: "#ff6a3d" }} />
-              Air sous pression
+              {t('legend_pressurized')}
             </div>
             <div className="flex items-center gap-2">
               <div className="h-[3px] w-[18px] rounded-sm" style={{ background: "#4b5b6e" }} />
-              Air / conduite au repos
+              {t('legend_rest')}
             </div>
             <div className="flex items-center gap-2">
               <div className="w-[18px] border-t-2 border-dashed" style={{ borderColor: "#ffd23f" }} />
-              Signal de pilotage actif
+              {t('legend_signal')}
             </div>
           </div>
           {/* aide */}
@@ -364,49 +366,41 @@ export default function Workbench() {
           >
             {t('editor_help')}
           </div>
+
+          {/* Signature Auteur */}
+          <div className="absolute right-3 bottom-2.5 pointer-events-none opacity-40 hover:opacity-100 transition-opacity">
+            <span className="text-[8px] uppercase tracking-[0.2em] text-[#5d7189] font-medium block text-right">
+              {t('author_by')}
+            </span>
+            <div className="text-lg font-normal text-[#ff6a3d]" style={{ fontFamily: "'Caveat', cursive" }}>
+              Rovamampionina Toavina
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* modale */}
-      {modal && (
-        <div
-          className="ps-modal-overlay fixed inset-0 z-50 flex items-center justify-center"
-          style={{ background: "rgba(6,10,15,0.6)" }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setModal(null);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setModal(null);
-          }}
-          role="dialog"
-          aria-modal="true"
-          tabIndex={-1}
-          ref={(el) => el?.focus()}
-        >
-          <div
-            className="rounded-xl border border-[#2f3f4f] px-5 py-4.5 min-w-[320px] max-w-[420px]"
-            style={{ background: "#141c27", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}
-          >
-            {modal.kind === "comp" && (() => {
-              const mc = doc.components.find((c) => c.id === modal.id);
-              if (!mc) return null;
-              return (
-              <CompPropertyModal
-                comp={mc as Component}
-                doc={doc}
-                onSave={(patch) => updateComponent(mc.id, patch)}
-                onClose={() => setModal(null)}
-              />
-              );
-            })()}
-            {modal.kind === "cartouche" && (
-              <CartoucheModal
-                field={modal.field}
-                cartouche={doc.cartouche}
-                onSave={setCartouche}
-                onClose={() => setModal(null)}
-              />
-            )}
+      {/* modales */}
+      {modal?.kind === "comp" && selectedComp && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-[#141c27] border border-[#2f3f4f] p-6 rounded-lg shadow-2xl">
+            <CompPropertyModal
+              comp={selectedComp}
+              doc={doc}
+              onSave={(p) => updateComponent(selectedComp.id, p)}
+              onClose={() => setModal(null)}
+            />
+          </div>
+        </div>
+      )}
+      {modal?.kind === "cartouche" && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-[#141c27] border border-[#2f3f4f] p-6 rounded-lg shadow-2xl">
+            <CartoucheModal
+              cartouche={doc.cartouche}
+              field={modal.field}
+              onClose={() => setModal(null)}
+              onSave={(f, v) => setCartouche(f, v)}
+            />
           </div>
         </div>
       )}

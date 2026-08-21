@@ -14,17 +14,21 @@ export interface PortDef {
   dir: PortDir;
 }
 
+export interface LocalizedString {
+  fr: string;
+  en: string;
+}
+
 export interface CompDef {
-  label: string;
-  cat: string;
+  label: string | LocalizedString;
+  doc: string | LocalizedString;
+  cat: string | LocalizedString;
   prefix: string;
   w: number;
   h: number;
   ports: PortDef[];
   defaultParams: Record<string, number | string>;
   initSim(): Record<string, unknown>;
-  /** Description ISO 1219 — explication de fonctionnement affichée au survol. */
-  doc?: string;
 }
 
 export interface Component {

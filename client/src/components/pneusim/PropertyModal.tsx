@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { getDef } from "@/lib/pneusim/engine";
 import type { Cartouche, Component } from "@/lib/pneusim/types";
 import type { CircuitDoc } from "@/lib/pneusim/types";
+import { useTranslation, getL } from "@/lib/i18n";
 
 interface CompModalProps {
   comp: Component;
@@ -16,6 +17,7 @@ interface CompModalProps {
 }
 
 export function CompPropertyModal({ comp, doc, onSave, onClose }: CompModalProps) {
+  const { lang, t } = useTranslation();
   const def = getDef(comp.type);
   const [num, setNum] = useState(comp.num);
   const [strokeTime, setStrokeTime] = useState(String(comp.params.strokeTime ?? 2));
@@ -41,9 +43,9 @@ export function CompPropertyModal({ comp, doc, onSave, onClose }: CompModalProps
 
   return (
     <div className="min-w-[320px] max-w-[420px]">
-      <h3 className="m-0 mb-3.5 text-[14px] text-[#4aa8ff] tracking-wide">{def?.label}</h3>
+      <h3 className="m-0 mb-3.5 text-[14px] text-[#4aa8ff] tracking-wide">{def ? getL(def.label, lang) : ""}</h3>
       <div className="mb-3 flex flex-col gap-1.5">
-        <label className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px]">Repère</label>
+        <label className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px]">{lang === 'fr' ? 'Repère' : 'Reference'}</label>
         <input
           type="text"
           value={num}
@@ -53,7 +55,9 @@ export function CompPropertyModal({ comp, doc, onSave, onClose }: CompModalProps
       </div>
       {(comp.type === "cylinder_double" || comp.type === "cylinder_single" || comp.type === "cylinder_prop") && (
         <div className="mb-3 flex flex-col gap-1.5">
-          <label className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px]">Temps de course complète (s)</label>
+          <label className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px]">
+            {lang === 'fr' ? 'Temps de course complète (s)' : 'Full stroke time (s)'}
+          </label>
           <input
             type="number"
             min={0.2}
@@ -68,7 +72,7 @@ export function CompPropertyModal({ comp, doc, onSave, onClose }: CompModalProps
       {comp.type === "flowcontrol" && (
         <div className="mb-3 flex flex-col gap-1.5">
           <label className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px]">
-            Restriction — <span className="font-mono text-[#4aa8ff]">{restriction}%</span>
+            {lang === 'fr' ? 'Restriction' : 'Restriction'} — <span className="font-mono text-[#4aa8ff]">{restriction}%</span>
           </label>
           <input
             type="range"
@@ -84,13 +88,13 @@ export function CompPropertyModal({ comp, doc, onSave, onClose }: CompModalProps
       {comp.type === "sensor" && (
         <>
           <div className="mb-3 flex flex-col gap-1.5">
-            <label className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px]">Vérin surveillé</label>
+            <label className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px]">{lang === 'fr' ? 'Vérin surveillé' : 'Monitored Cylinder'}</label>
             <select
               value={targetId}
               onChange={(e) => setTargetId(e.target.value)}
               className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-2 rounded-md text-[13px]"
             >
-              <option value="">— aucun —</option>
+              <option value="">— {lang === 'fr' ? 'aucun' : 'none'} —</option>
               {doc.components
                 .filter((c) => c.type === "cylinder_double" || c.type === "cylinder_single" || c.type === "cylinder_prop")
                 .map((t) => (
@@ -101,14 +105,14 @@ export function CompPropertyModal({ comp, doc, onSave, onClose }: CompModalProps
             </select>
           </div>
           <div className="mb-3 flex flex-col gap-1.5">
-            <label className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px]">Position détectée</label>
+            <label className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px]">{lang === 'fr' ? 'Position détectée' : 'Detected Position'}</label>
             <select
               value={position}
               onChange={(e) => setPosition(e.target.value)}
               className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-2 rounded-md text-[13px]"
             >
-              <option value="extended">Sorti (fin de course +)</option>
-              <option value="retracted">Rentré (fin de course −)</option>
+              <option value="extended">{lang === 'fr' ? 'Sorti (fin de course +)' : 'Extended (limit switch +)'}</option>
+              <option value="retracted">{lang === 'fr' ? 'Rentré (fin de course −)' : 'Retracted (limit switch −)'}</option>
             </select>
           </div>
         </>
@@ -119,14 +123,14 @@ export function CompPropertyModal({ comp, doc, onSave, onClose }: CompModalProps
           onClick={onClose}
           className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-3 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f]"
         >
-          Annuler
+          {lang === 'fr' ? 'Annuler' : 'Cancel'}
         </button>
         <button
           type="button"
           onClick={ok}
           className="bg-gradient-to-b from-[#2c7fd6] to-[#1f63ac] border border-[#3a8fe0] text-white px-3 py-1.5 rounded-md text-[12.5px] font-semibold hover:from-[#3488e0] hover:to-[#256fb8]"
         >
-          Valider
+          {lang === 'fr' ? 'Valider' : 'Confirm'}
         </button>
       </div>
     </div>
@@ -148,8 +152,17 @@ const FIELD_META: Record<keyof Cartouche, { label: string; type: string }> = {
 };
 
 export function CartoucheModal({ field, cartouche, onSave, onClose }: CartoucheModalProps) {
+  const { lang, t } = useTranslation();
   const [value, setValue] = useState(cartouche[field]);
-  const meta = FIELD_META[field];
+  
+  const FIELD_META_EN: Record<keyof Cartouche, { label: string; type: string }> = {
+    titre: { label: "Schematic Title", type: "text" },
+    auteur: { label: "Author", type: "text" },
+    date: { label: "Date", type: "date" },
+    folio: { label: "Folio (page no.)", type: "text" },
+  };
+  
+  const meta = lang === 'fr' ? FIELD_META[field] : FIELD_META_EN[field];
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     inputRef.current?.focus();
@@ -163,7 +176,7 @@ export function CartoucheModal({ field, cartouche, onSave, onClose }: CartoucheM
 
   return (
     <div className="min-w-[320px] max-w-[420px]">
-      <h3 className="m-0 mb-3.5 text-[14px] text-[#4aa8ff] tracking-wide">Modifier — {meta.label}</h3>
+      <h3 className="m-0 mb-3.5 text-[14px] text-[#4aa8ff] tracking-wide">{lang === 'fr' ? 'Modifier' : 'Edit'} — {meta.label}</h3>
       <div className="mb-3 flex flex-col gap-1.5">
         <label className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px]">{meta.label}</label>
         <input
@@ -183,14 +196,14 @@ export function CartoucheModal({ field, cartouche, onSave, onClose }: CartoucheM
           onClick={onClose}
           className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-3 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f]"
         >
-          Annuler
+          {lang === 'fr' ? 'Annuler' : 'Cancel'}
         </button>
         <button
           type="button"
           onClick={ok}
           className="bg-gradient-to-b from-[#2c7fd6] to-[#1f63ac] border border-[#3a8fe0] text-white px-3 py-1.5 rounded-md text-[12.5px] font-semibold hover:from-[#3488e0] hover:to-[#256fb8]"
         >
-          Valider
+          {lang === 'fr' ? 'Valider' : 'Confirm'}
         </button>
       </div>
     </div>

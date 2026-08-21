@@ -11,6 +11,7 @@ import type { Cartouche, Component, Wire } from "@/lib/pneusim/types";
 import CompSymbol from "./CompSymbol";
 import { CartoucheLayer, FrameLayer, GridLayer } from "./SheetChrome";
 import { syncComponentMap } from "./editorStore";
+import { useTranslation, getL } from "@/lib/i18n";
 
 interface WireDraft {
   fromId: string;
@@ -67,6 +68,7 @@ export default function SheetCanvas(props: Props) {
     onOpenCartoucheModal,
   } = props;
 
+  const { lang } = useTranslation();
   const svgRef = useRef<SVGSVGElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const worldRef = useRef<SVGGElement>(null);
@@ -404,211 +406,158 @@ export default function SheetCanvas(props: Props) {
     wireDraftRef.current = null;
   }, [releaseHeldValve]);
 
-  /* ---------- Zoom molette ---------- */
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
       e.preventDefault();
       const svg = svgRef.current;
       if (!svg) return;
       const p = screenToSvg(svg, e.clientX, e.clientY);
-      const factor = e.deltaY > 0 ? 1.1 : 0.9;
-      applyView(zoomAt(viewRef.current, p, factor));
+      const zoom = e.deltaY > 0 ? 1.15 : 0.85;
+      applyView(zoomAt(viewRef.current, p, zoom));
     },
     [applyView]
   );
 
-  /* ---------- Double clic : propriétés ---------- */
-  const handleDoubleClick = useCallback(
-    (e: React.MouseEvent) => {
-      const target = e.target as Element;
-      const compEl = target.closest(".comp");
-      const ctField = target.closest(".ct-field");
-      if (compEl) {
-        onOpenCompModal((compEl as HTMLElement).dataset.id!);
-      } else if (ctField) {
-        onOpenCartoucheModal((ctField as HTMLElement).dataset.ct as keyof Cartouche);
-      }
-    },
-    [onOpenCompModal, onOpenCartoucheModal]
-  );
+  const draftState = wireDraftRef.current;
 
-  /* ---------- Clavier (Delete / R / Esc) ---------- */
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      // modale : ne pas intercepter
-      if (document.querySelector(".ps-modal-overlay")) return;
-      if ((e.key === "Delete" || e.key === "Backspace") && selectedRef.current) {
-        removeComponent(selectedRef.current);
-      } else if (e.key === "r" || e.key === "R") {
-        const c = doc.components.find((cc) => cc.id === selectedRef.current);
-        if (c) updateComponent(c.id, { rot: (c.rot + 90) % 360 });
-      } else if (e.key === "Escape") {
-        wireDraftRef.current = null;
-        setSelected(null);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [doc.components, removeComponent, setSelected, updateComponent]);
-
-  /* ---------- Tracé en cours (RAF) ---------- */
-  const [draftState, setDraftState] = useState<WireDraft | null>(null);
-  useEffect(() => {
-    let raf = 0;
-    const loop = () => {
-      const wd = wireDraftRef.current;
-      setDraftState(wd ? { ...wd } : null);
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  /* ---------- Rendu ---------- */
   return (
     <div
       ref={wrapRef}
-      className="relative h-full w-full overflow-hidden"
-      style={{ background: "#0d1219" }}
-      onDragOver={(e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "copy";
-      }}
+      id="ps-canvas-wrap"
+      className="w-full h-full relative overflow-hidden"
       onDrop={handleDrop}
+      onDragOver={(e) => e.preventDefault()}
     >
       <svg
         ref={svgRef}
         id="ps-svg"
-        className="block h-full w-full select-none"
         viewBox={`0 0 ${SHEET_W} ${SHEET_H}`}
-        preserveAspectRatio="xMidYMid meet"
+        className="w-full h-full block touch-none select-none"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
-        onLostPointerCapture={handlePointerCancel}
         onWheel={handleWheel}
-        onDoubleClick={handleDoubleClick}
+        preserveAspectRatio="xMidYMid meet"
       >
-        <rect x={0} y={0} width={SHEET_W} height={SHEET_H} fill="#121a24" />
-        {/* monde : pan/zoom par transform, la viewBox reste fixe */}
-        <g id="world" ref={worldRef}>
         <GridLayer />
-        <FrameLayer />
-        {/* conduites */}
-        <g>
-          {doc.wires.map((w) => {
-            const compA = doc.components.find((c) => c.id === w.a);
-            const compB = doc.components.find((c) => c.id === w.b);
-            const A = compA ? wireEndpoint(compA, w.aPort) : null;
-            const B = compB ? wireEndpoint(compB, w.bPort) : null;
-            if (!A || !B) return null;
-            const d = lPath(A.x, A.y, B.x, B.y);
-            if (w.kind === "signal") {
-              const active = isSignalActive(`${w.a}:${w.aPort}`) || isSignalActive(`${w.b}:${w.bPort}`);
+        <g ref={worldRef}>
+          <FrameLayer />
+          {/* liaisons */}
+          <g>
+            {doc.wires.map((w) => {
+              const compA = doc.components.find((c) => c.id === w.a);
+              const compB = doc.components.find((c) => c.id === w.b);
+              const A = compA ? wireEndpoint(compA, w.aPort) : null;
+              const B = compB ? wireEndpoint(compB, w.bPort) : null;
+              if (!A || !B) return null;
+              const d = lPath(A.x, A.y, B.x, B.y);
+              if (w.kind === "signal") {
+                const active = isSignalActive(`${w.a}:${w.aPort}`) || isSignalActive(`${w.b}:${w.bPort}`);
+                return (
+                  <path
+                    key={w.id}
+                    d={d}
+                    fill="none"
+                    stroke={active ? "#ffd23f" : "#3d4a5a"}
+                    strokeWidth={2}
+                    strokeDasharray="5 4"
+                    style={{ transition: "stroke 150ms ease-out" }}
+                  />
+                );
+              }
+              const press = isPressurized(`${w.a}:${w.aPort}`) || isPressurized(`${w.b}:${w.bPort}`);
               return (
                 <path
                   key={w.id}
                   d={d}
                   fill="none"
-                  stroke={active ? "#ffd23f" : "#3d4a5a"}
-                  strokeWidth={2}
-                  strokeDasharray="5 4"
+                  stroke={press ? "#ff6a3d" : "#4b5b6e"}
+                  strokeWidth={2.6}
+                  strokeLinecap="round"
                   style={{ transition: "stroke 150ms ease-out" }}
                 />
               );
-            }
-            const press = isPressurized(`${w.a}:${w.aPort}`) || isPressurized(`${w.b}:${w.bPort}`);
-            return (
+            })}
+            {draftState && (
               <path
-                key={w.id}
-                d={d}
+                d={lPath(draftState.x1, draftState.y1, draftState.x2, draftState.y2)}
                 fill="none"
-                stroke={press ? "#ff6a3d" : "#4b5b6e"}
-                strokeWidth={2.6}
-                strokeLinecap="round"
-                style={{ transition: "stroke 150ms ease-out" }}
+                stroke="#4aa8ff"
+                strokeWidth={2}
+                strokeDasharray="4 3"
+                pointerEvents="none"
               />
-            );
-          })}
-          {draftState && (
-            <path
-              d={lPath(draftState.x1, draftState.y1, draftState.x2, draftState.y2)}
-              fill="none"
-              stroke="#4aa8ff"
-              strokeWidth={2}
-              strokeDasharray="4 3"
-              pointerEvents="none"
-            />
-          )}
-        </g>
-        {/* composants */}
-        <g>
-          {doc.components.map((comp) => {
-            const def = getDef(comp.type);
-            if (!def) return null;
-            const bb = boundingBoxPadded(comp.type);
-            return (
-              <g
-                key={comp.id}
-                className={`comp ${selected === comp.id ? "selected" : ""}`}
-                data-id={comp.id}
-                data-tooltip-id="ps-tooltip"
-                data-tooltip-title={`${comp.num || def.label.split(" ")[0]} · ${def.label}`}
-                data-tooltip-doc={def.doc}
-                transform={`translate(${comp.x},${comp.y}) rotate(${comp.rot},${def.w / 2},${def.h / 2})`}
-                style={{ cursor: "move" }}
-              >
-                {selected === comp.id && (
-                  <rect
-                    x={bb.minX}
-                    y={bb.minY}
-                    width={bb.maxX - bb.minX}
-                    height={bb.maxY - bb.minY}
-                    fill="none"
-                    stroke="#4aa8ff"
-                    strokeDasharray="4 3"
-                    strokeWidth={1.5}
-                  />
-                )}
-                <CompSymbol comp={comp} />
-                {comp.fault && (
-                  <g transform={`translate(${def.w - 10}, 0)`}>
-                    <circle r="7" fill="#ff5d5d" stroke="#0d1219" strokeWidth="1" />
-                    <text y="3.5" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" fontFamily="monospace">!</text>
-                  </g>
-                )}
-                {def.ports.map((p) => (
-                  <circle
-                    key={p.id}
-                    className={`port ${p.kind === "signal" ? "signal" : ""}`}
-                    data-port={p.id}
-                    data-kind={p.kind}
-                    cx={p.x}
-                    cy={p.y}
-                    r={4.5}
-                    fill={p.kind === "signal" ? "#3a3320" : "#1a2432"}
-                    stroke={p.kind === "signal" ? "#3d4a5a" : "#8296ab"}
-                    strokeWidth={1.4}
-                    style={{ cursor: "crosshair" }}
-                  />
-                ))}
-                <text
-                  x={def.w / 2}
-                  y={def.h + 16}
-                  textAnchor="middle"
-                  fontSize={10.5}
-                  fontFamily="monospace"
-                  fill="#4aa8ff"
-                  fontWeight={700}
-                  pointerEvents="none"
+            )}
+          </g>
+          {/* composants */}
+          <g>
+            {doc.components.map((comp) => {
+              const def = getDef(comp.type);
+              if (!def) return null;
+              const bb = boundingBoxPadded(comp.type);
+              const label = getL(def.label, lang);
+              return (
+                <g
+                  key={comp.id}
+                  className={`comp ${selected === comp.id ? "selected" : ""}`}
+                  data-id={comp.id}
+                  data-tooltip-id="ps-tooltip"
+                  data-tooltip-title={`${comp.num || label.split(" ")[0]} · ${label}`}
+                  data-tooltip-doc={getL(def.doc, lang)}
+                  transform={`translate(${comp.x},${comp.y}) rotate(${comp.rot},${def.w / 2},${def.h / 2})`}
+                  style={{ cursor: "move" }}
                 >
-                  {comp.num}
-                </text>
-              </g>
-            );
-          })}
-        </g>
+                  {selected === comp.id && (
+                    <rect
+                      x={bb.minX}
+                      y={bb.minY}
+                      width={bb.maxX - bb.minX}
+                      height={bb.maxY - bb.minY}
+                      fill="none"
+                      stroke="#4aa8ff"
+                      strokeDasharray="4 3"
+                      strokeWidth={1.5}
+                    />
+                  )}
+                  <CompSymbol comp={comp} />
+                  {comp.fault && (
+                    <g transform={`translate(${def.w - 10}, 0)`}>
+                      <circle r="7" fill="#ff5d5d" stroke="#0d1219" strokeWidth="1" />
+                      <text y="3.5" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" fontFamily="monospace">!</text>
+                    </g>
+                  )}
+                  {def.ports.map((p) => (
+                    <circle
+                      key={p.id}
+                      className={`port ${p.kind === "signal" ? "signal" : ""}`}
+                      data-port={p.id}
+                      data-kind={p.kind}
+                      cx={p.x}
+                      cy={p.y}
+                      r={4.5}
+                      fill={p.kind === "signal" ? "#3a3320" : "#1a2432"}
+                      stroke={p.kind === "signal" ? "#3d4a5a" : "#8296ab"}
+                      strokeWidth={1.4}
+                      style={{ cursor: "crosshair" }}
+                    />
+                  ))}
+                  <text
+                    x={def.w / 2}
+                    y={def.h + 16}
+                    textAnchor="middle"
+                    fontSize={10.5}
+                    fontFamily="monospace"
+                    fill="#4aa8ff"
+                    fontWeight={700}
+                    pointerEvents="none"
+                  >
+                    {comp.num}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
         </g>
         <CartoucheLayer cartouche={doc.cartouche} onEdit={onOpenCartoucheModal} />
       </svg>

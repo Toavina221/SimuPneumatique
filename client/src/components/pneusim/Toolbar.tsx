@@ -4,6 +4,7 @@
 // sauvegarde/chargement, export SVG. Compact, monospace, état lisible.
 
 import { useEffect, useRef, useState } from "react";
+import { Link } from "wouter";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,7 +90,7 @@ function saveFavorites(list: Favorite[]) {
   try {
     localStorage.setItem(FAV_KEY, JSON.stringify(list));
   } catch {
-    toast.error("Stockage local indisponible");
+    // Silent fail for storage
   }
 }
 
@@ -126,12 +127,12 @@ export default function Toolbar(props: Props) {
 
   const commitSaveFavorite = () => {
     const saved = stripSim(onGetDoc());
-    const cart = saved.cartouche?.titre || "Sans titre";
+    const cart = saved.cartouche?.titre || (lang === 'fr' ? "Sans titre" : "Untitled");
     const name = saveName.trim() || cart;
-    const next = [...loadFavorites(), { name, date: new Date().toLocaleDateString("fr-FR"), doc: saved }];
+    const next = [...loadFavorites(), { name, date: new Date().toLocaleDateString(lang === 'fr' ? "fr-FR" : "en-US"), doc: saved }];
     setFavorites(next);
     saveFavorites(next);
-    toast.success(`« ${name} » ajouté aux favoris`);
+    toast.success(lang === 'fr' ? `« ${name} » ajouté aux favoris` : `"${name}" added to favorites`);
     setSaveOpen(false);
     setSaveName("");
   };
@@ -157,11 +158,13 @@ export default function Toolbar(props: Props) {
         <svg className="h-3.5 w-3.5 text-[#ff6a3d]" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
-        Mes favoris
+        {t('toolbar_favorites')}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[280px] max-h-[340px] overflow-y-auto bg-[#141c27] border-[#2f3f4f] text-[#dfe8f2]">
         <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.1em] text-[#5d7189]">
-          {favorites.length === 0 ? "Aucun schéma enregistré" : `${favorites.length} schéma${favorites.length > 1 ? "s" : ""}`}
+          {favorites.length === 0 
+            ? (lang === 'fr' ? "Aucun schéma enregistré" : "No saved schematics") 
+            : `${favorites.length} ${lang === 'fr' ? "schéma" : "schematic"}${favorites.length > 1 ? "s" : ""}`}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {favorites.map((f, i) => (
@@ -170,7 +173,7 @@ export default function Toolbar(props: Props) {
             className="flex flex-col items-start gap-0.5 py-2 focus:bg-[#20303f]"
             onClick={() => {
               onLoadDoc(stripSim(f.doc));
-              toast.success(`« ${f.name} » chargé`);
+              toast.success(lang === 'fr' ? `« ${f.name} » chargé` : `"${f.name}" loaded`);
             }}
           >
             <span className="text-[12px] font-medium w-full flex items-center justify-between">
@@ -182,16 +185,16 @@ export default function Toolbar(props: Props) {
                   const next = loadFavorites().filter((_, j) => j !== i);
                   setFavorites(next);
                   saveFavorites(next);
-                  toast("Favori supprimé");
+                  toast(lang === 'fr' ? "Favori supprimé" : "Favorite deleted");
                 }}
                 className="text-[#5d7189] hover:text-[#ff5d5d] px-1"
-                aria-label={`Supprimer ${f.name}`}
+                aria-label={lang === 'fr' ? `Supprimer ${f.name}` : `Delete ${f.name}`}
               >
                 <Trash2 className="h-3 w-3" />
               </button>
             </span>
             <span className="text-[10.5px] text-[#5d7189]">
-              {f.date} · {f.doc.components.length} composants
+              {f.date} · {f.doc.components.length} {lang === 'fr' ? "composants" : "components"}
             </span>
           </DropdownMenuItem>
         ))}
@@ -200,11 +203,11 @@ export default function Toolbar(props: Props) {
           className="focus:bg-[#20303f]"
           onClick={() => {
             const saved = stripSim(onGetDoc());
-            setSaveName(saved.cartouche?.titre || "Sans titre");
+            setSaveName(saved.cartouche?.titre || (lang === 'fr' ? "Sans titre" : "Untitled"));
             setSaveOpen(true);
           }}
         >
-          <span className="text-[12px] font-semibold text-[#ff6a3d]">＋ Enregistrer le schéma actuel</span>
+          <span className="text-[12px] font-semibold text-[#ff6a3d]">＋ {lang === 'fr' ? "Enregistrer le schéma actuel" : "Save current schematic"}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -212,10 +215,12 @@ export default function Toolbar(props: Props) {
 
   return (
     <div className="flex items-center gap-1.5 flex-wrap px-2.5 py-1.5 border-b border-[#26333f]" style={{ background: "#141c27" }}>
-      <div className="flex items-center gap-1.5 mr-2 font-mono font-bold text-[14px] tracking-[1px] text-[#4aa8ff] select-none">
-        <img src={LOGO_URL} alt="PneumaSim" className="h-6 w-6" />
-        <span>PNEUMASIM</span>
-      </div>
+      <Link href="/">
+        <div className="flex items-center gap-1.5 mr-2 font-mono font-bold text-[14px] tracking-[1px] text-[#4aa8ff] select-none cursor-pointer hover:text-[#ff6a3d] transition-colors active:scale-95 group">
+          <img src={LOGO_URL} alt="PneumaSim" className="h-6 w-6" />
+          <span>PNEUMASIM</span>
+        </div>
+      </Link>
       <button
         type="button"
         onClick={onStart}
@@ -230,16 +235,16 @@ export default function Toolbar(props: Props) {
         disabled={!simRunning}
         className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#2c6aa3] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
         >
-        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg> Pause
+        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg> {lang === 'fr' ? "Pause" : "Pause"}
       </button>
       <button
         type="button"
         onClick={onReset}
         className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#2c6aa3]"
         >
-        <RotateCcw className="h-3.5 w-3.5" /> Réinitialiser
+        <RotateCcw className="h-3.5 w-3.5" /> {lang === 'fr' ? "Réinitialiser" : "Reset"}
       </button>
-      <span className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px] ml-1">Vitesse</span>
+      <span className="text-[11px] text-[#8296ab] uppercase tracking-[0.5px] ml-1">{lang === 'fr' ? "Vitesse" : "Speed"}</span>
       <select
         value={simSpeed}
         onChange={(e) => onSetSpeed(parseFloat(e.target.value))}
@@ -257,7 +262,7 @@ export default function Toolbar(props: Props) {
         disabled={!selected}
         className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#2c6aa3] disabled:opacity-40 disabled:cursor-not-allowed"
         >
-        <RotateCw className="h-3.5 w-3.5" /> Pivoter
+        <RotateCw className="h-3.5 w-3.5" /> {lang === 'fr' ? "Pivoter" : "Rotate"}
       </button>
       <button
         type="button"
@@ -267,7 +272,7 @@ export default function Toolbar(props: Props) {
         disabled={!selected}
         className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#ff5d5d] hover:text-[#ff5d5d] disabled:opacity-40 disabled:cursor-not-allowed"
         >
-        <Trash2 className="h-3.5 w-3.5" /> Supprimer
+        <Trash2 className="h-3.5 w-3.5" /> {lang === 'fr' ? "Supprimer" : "Delete"}
       </button>
       <span className="w-px h-[22px] bg-[#2f3f4f] mx-1" />
       <button
@@ -282,7 +287,7 @@ export default function Toolbar(props: Props) {
         onClick={onFitView}
         className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#2c6aa3]"
       >
-        Ajuster
+        {lang === 'fr' ? "Ajuster" : "Fit"}
       </button>
       <button
         type="button"
@@ -313,7 +318,7 @@ export default function Toolbar(props: Props) {
         type="button"
         onClick={() => {
           downloadJson(stripSim(onGetDoc()));
-          toast.success("Schéma enregistré (.json)");
+          toast.success(lang === 'fr' ? "Schéma enregistré (.json)" : "Schematic saved (.json)");
         }}
         className="bg-[#1a2432] flex items-center gap-1.5 border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#2c6aa3]"
       >
@@ -378,9 +383,9 @@ export default function Toolbar(props: Props) {
               counters: data.counters ?? {},
             });
             resetSim({ components: [], wires: [] } as unknown as CircuitDoc);
-            toast.success("Schéma chargé");
+            toast.success(lang === 'fr' ? "Schéma chargé" : "Schematic loaded");
           } catch {
-            toast.error("Fichier invalide");
+            toast.error(lang === 'fr' ? "Fichier invalide" : "Invalid file");
           }
           e.target.value = "";
         }}

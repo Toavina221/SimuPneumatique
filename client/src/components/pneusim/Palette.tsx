@@ -9,9 +9,10 @@ import { COLLECTION_TREE } from "@/lib/pneusim/defs";
 import { getDef } from "@/lib/pneusim/engine";
 import CompSymbol from "./CompSymbol";
 import type { Component } from "@/lib/pneusim/types";
+import { useTranslation, getL, LocalizedString } from "@/lib/i18n";
 
 interface TreeNode {
-  label: string;
+  label: string | LocalizedString;
   items?: string[];
   children?: TreeNode[];
 }
@@ -31,6 +32,7 @@ function FakeComp(type: string): Component {
 }
 
 function TreeItem({ node }: { node: TreeNode }) {
+  const { lang, t } = useTranslation();
   const [open, setOpen] = useState(true);
 
   if (node.items) {
@@ -50,8 +52,8 @@ function TreeItem({ node }: { node: TreeNode }) {
               }}
               className="flex items-center gap-2.5 px-2 py-2 rounded-md cursor-grab border border-transparent hover:bg-[#1a2432] hover:border-[#2f3f4f] active:cursor-grabbing select-none"
               data-tooltip-id="ps-tooltip"
-              data-tooltip-title={`${def.label} — ISO 1219`}
-              data-tooltip-doc={def.doc}
+              data-tooltip-title={`${getL(def.label, lang)} — ISO 1219`}
+              data-tooltip-doc={getL(def.doc, lang)}
             >
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[4px] border border-[#26333f] bg-[#111a26] group-hover:border-[#ff6a3d]/50">
                 <svg width={34} height={34} viewBox={`-16 -16 ${def.w + 32} ${def.h + 32}`} style={{ overflow: "visible" }}>
@@ -59,7 +61,7 @@ function TreeItem({ node }: { node: TreeNode }) {
                 </svg>
               </span>
               <div className="flex flex-col leading-tight min-w-0">
-                <span className="text-[12px] font-medium text-[#dfe8f2] leading-snug">{def.label}</span>
+                <span className="text-[12px] font-medium text-[#dfe8f2] leading-snug">{getL(def.label, lang)}</span>
                 <span className="text-[10px] font-mono text-[#5d7189] mt-0.5">{def.prefix}·</span>
               </div>
             </div>
@@ -85,13 +87,13 @@ function TreeItem({ node }: { node: TreeNode }) {
         <svg className="h-3.5 w-3.5 text-[#ff6a3d]/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/>
         </svg>
-        {node.label}
+        {getL(node.label, lang)}
       </button>
       <div
         className={`ml-3.5 border-l border-dashed border-[#2f3f4f] pl-1.5 overflow-hidden transition-all ${open ? "block" : "hidden"}`}
       >
         {node.children?.map((ch, i) => (
-          <TreeItem key={`${node.label}-${i}`} node={ch} />
+          <TreeItem key={`${getL(node.label, lang)}-${i}`} node={ch} />
         ))}
       </div>
     </div>
