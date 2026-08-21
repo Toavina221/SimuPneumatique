@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import { toast } from "sonner";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -16,6 +17,7 @@ import {
 import Toolbar from "@/components/pneusim/Toolbar";
 import Palette from "@/components/pneusim/Palette";
 import SheetCanvas from "@/components/pneusim/SheetCanvas";
+import PerformanceGraph from "@/components/pneusim/PerformanceGraph";
 import { CompPropertyModal, CartoucheModal } from "@/components/pneusim/PropertyModal";
 import IsoTooltip from "@/components/pneusim/IsoTooltip";
 import { useCircuit } from "@/lib/pneusim/useCircuit";
@@ -28,10 +30,14 @@ const VALVE_TYPES = [
   "valve22",
   "valve32",
   "valve32_bi",
+  "valve42",
+  "valve43_closed",
   "valve52_mono",
   "valve52_bi",
   "valve53_closed",
   "valve53_open",
+  "solenoid_valve",
+  "valve_pedal",
 ];
 
 const LOGO_URL = "/manus-storage/pneumasim-logo_42e92c26.png";
@@ -66,6 +72,7 @@ export default function Workbench() {
     | { kind: "cartouche"; field: keyof Cartouche }
     | null
   >(null);
+  const [showGraph, setShowGraph] = useState(false);
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   // ── Menu Exemples ──────────────────────────────────────────────
@@ -133,7 +140,9 @@ export default function Workbench() {
   useEffect(() => {
     if (exampleLoaded.current) return;
     exampleLoaded.current = true;
-    loadExample("directe");
+    const toLoad = localStorage.getItem("ps_load_example") || "directe";
+    localStorage.removeItem("ps_load_example");
+    loadExample(toLoad);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -170,31 +179,41 @@ export default function Workbench() {
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#0d1219", color: "#dfe8f2" }}>
       {/* Infobulle ISO 1219 — survol composants et palette (un seul tooltip global) */}
       <IsoTooltip />
-      <Toolbar
-        statusTxt={statusTxt}
-        simRunning={simRunning}
-        simSpeed={simSpeed}
-        selected={selected}
-        svgEl={svgRef.current}
-        onStart={startSim}
-        onPause={pauseSim}
-        onReset={reset}
-        onSetSpeed={setSimSpeed}
-        onDelete={() => selected && removeComponent(selected)}
-        onRotate={() => {
-          if (!selected) return;
-          const c = doc.components.find((cc) => cc.id === selected);
-          if (c) updateComponent(c.id, { rot: (c.rot + 90) % 360 });
-        }}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onFitView={handleFitView}
-        onLoadDoc={loadDoc}
-        onGetDoc={() => doc}
-        onGetComponents={() => doc.components}
-        onSetView={setView}
-        onOpenCartoucheModal={(f) => setModal({ kind: "cartouche", field: f })}
-      />
+        <Toolbar
+          statusTxt={statusTxt}
+          simRunning={simRunning}
+          simSpeed={simSpeed}
+          selected={selected}
+          svgEl={svgRef.current}
+          onStart={startSim}
+          onPause={pauseSim}
+          onReset={reset}
+          onSetSpeed={setSimSpeed}
+          onDelete={() => selected && removeComponent(selected)}
+          onRotate={() => {
+            if (!selected) return;
+            const c = doc.components.find((cc) => cc.id === selected);
+            if (c) updateComponent(c.id, { rot: (c.rot + 90) % 360 });
+          }}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onFitView={handleFitView}
+          onLoadDoc={loadDoc}
+          onGetDoc={() => doc}
+          onGetComponents={() => doc.components}
+          onSetView={setView}
+          onOpenCartoucheModal={(f) => setModal({ kind: "cartouche", field: f })}
+          onToggleGraph={() => setShowGraph(!showGraph)}
+          showGraph={showGraph}
+          onDiagnostic={() => {
+            const comps = doc.components.filter(c => c.type !== "source");
+            if (comps.length === 0) return;
+            const target = comps[Math.floor(Math.random() * comps.length)];
+            const fault = Math.random() > 0.5 ? "leak" : "block";
+            updateComponent(target.id, { fault });
+            toast.error(`Panne détectée : ${target.num || target.id} (${fault === "leak" ? "fuite" : "blocage"})`);
+          }}
+        />
       <div className="flex-1 flex min-h-0">
         {/* palette */}
         <div
@@ -275,6 +294,14 @@ export default function Workbench() {
             onOpenCompModal={(id) => setModal({ kind: "comp", id })}
             onOpenCartoucheModal={(f) => setModal({ kind: "cartouche", field: f })}
           />
+          
+          <PerformanceGraph 
+            components={doc.components}
+            pressurized={ctx.simResult.pressurized}
+            isOpen={showGraph}
+            onClose={() => setShowGraph(false)}
+          />
+
           {/* légende */}
           <div
             className="absolute right-3 top-3 rounded-lg border border-[#26333f] px-3 py-2 text-[11px] flex flex-col gap-1.5 pointer-events-none"

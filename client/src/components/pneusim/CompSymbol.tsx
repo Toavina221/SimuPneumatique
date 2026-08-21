@@ -469,6 +469,153 @@ export default function CompSymbol({ comp }: Props) {
           <path d="M4,18 L1,21 M18,18 L21,21 M11,22 L11,24" stroke={COL.textDim} strokeWidth={1.2} />
         </>
       );
+    case "frl": {
+      return (
+        <>
+          <rect x={0} y={0} width={80} height={40} fill={COL.panel2} stroke={COL.line2} strokeWidth={1.4} />
+          <path d="M0,20 L15,20 M65,20 L80,20" stroke={COL.textDim} strokeWidth={2} />
+          {/* filtre */}
+          <rect x={15} y={10} width={15} height={20} fill="none" stroke={COL.textDim} strokeWidth={1.2} strokeDasharray="2 2" />
+          {/* régul */}
+          <circle cx={40} cy={20} r={8} fill="none" stroke={COL.textDim} strokeWidth={1.2} />
+          <path d="M34,20 L46,20 M40,14 L40,26" stroke={COL.textDim} strokeWidth={1} />
+          {/* lub */}
+          <path d="M50,10 L65,10 L65,30 L50,30 Z" fill="none" stroke={COL.textDim} strokeWidth={1.2} />
+          <circle cx={57.5} cy={15} r={2} fill={COL.textDim} />
+        </>
+      );
+    }
+    case "dryer":
+      return (
+        <>
+          <rect x={0} y={0} width={40} height={40} fill={COL.panel2} stroke={COL.line2} strokeWidth={1.4} />
+          <path d="M0,20 L40,20" stroke={COL.textDim} strokeWidth={2} />
+          <path d="M10,10 L30,30 M10,30 L30,10" stroke={COL.textDim} strokeWidth={1.4} />
+        </>
+      );
+    case "cylinder_rodless": {
+      const pos = ((sim.pos as number) ?? 0.5) as number;
+      const carriageX = 10 + pos * 140;
+      return (
+        <>
+          <rect x={0} y={5} width={160} height={20} rx={2} fill={COL.panel2} stroke={COL.line2} strokeWidth={1.6} />
+          <rect x={carriageX - 10} y={0} width={20} height={10} fill={COL.rod} stroke={COL.textDim} strokeWidth={1} />
+          <circle cx={10} cy={25} r={2.6} fill={pA ? COL.pressurized : COL.unpressurized} />
+          <circle cx={150} cy={25} r={2.6} fill={pB ? COL.pressurized : COL.unpressurized} />
+        </>
+      );
+    }
+    case "rotary_actuator": {
+      const pos = ((sim.pos as number) ?? 0) as number;
+      const ang = pos * 180 - 90;
+      return (
+        <>
+          <circle cx={30} cy={30} r={25} fill={COL.panel2} stroke={COL.line2} strokeWidth={1.6} />
+          <line x1={30} y1={30} x2={30 + 20 * Math.cos(ang * Math.PI / 180)} y2={30 + 20 * Math.sin(ang * Math.PI / 180)} stroke={COL.rod} strokeWidth={4} />
+          <circle cx={0} cy={45} r={2.6} fill={pA ? COL.pressurized : COL.unpressurized} />
+          <circle cx={60} cy={45} r={2.6} fill={pB ? COL.pressurized : COL.unpressurized} />
+        </>
+      );
+    }
+    case "bellows": {
+      const pos = ((sim.pos as number) ?? 0) as number;
+      const h = 20 + pos * 25;
+      return (
+        <>
+          <path d={`M10,${50 - h} Q20,${50 - h - 5} 30,${50 - h} Q40,${50 - h - 5} 50,${50 - h} L50,50 L10,50 Z`} fill={COL.panel2} stroke={COL.textDim} strokeWidth={1.4} />
+          <circle cx={30} cy={50} r={2.6} fill={pA ? COL.pressurized : COL.unpressurized} />
+        </>
+      );
+    }
+    case "valve42": {
+      const right = sim.state === "right";
+      return (
+        <>
+          <rect x={4} y={2} width={52} height={40} rx={4} fill={right ? "#2a3f2f" : COL.panel2} stroke={COL.line2} strokeWidth={1.4} />
+          {right ? (
+            <>
+              <path d="M15,44 L15,0" stroke={COL.accent} strokeWidth={2} fill="none" />
+              <path d="M45,44 L45,0" stroke={COL.accent} strokeWidth={2} fill="none" />
+            </>
+          ) : (
+            <>
+              <path d="M15,44 L45,0" stroke={COL.accent} strokeWidth={2} fill="none" />
+              <path d="M45,44 L15,0" stroke={COL.accent} strokeWidth={2} fill="none" />
+            </>
+          )}
+          <rect x={-16} y={15} width={10} height={14} fill={COL.panel2} stroke={COL.textDim} strokeWidth={1.4} />
+          <line x1={-16} y1={15} x2={-6} y2={29} stroke={COL.textDim} strokeWidth={1} />
+        </>
+      );
+    }
+    case "valve43_closed": {
+      const st = sim.state as string;
+      const boxFill = st !== "center" ? "#2a3f2f" : COL.panel2;
+      return (
+        <>
+          <rect x={4} y={2} width={72} height={40} rx={4} fill={boxFill} stroke={COL.line2} strokeWidth={1.4} />
+          {st === "right" ? (
+            <path d="M25,44 L25,0 M55,44 L55,0" stroke={COL.accent} strokeWidth={2} fill="none" />
+          ) : st === "left" ? (
+            <path d="M25,44 L55,0 M55,44 L25,0" stroke={COL.accent} strokeWidth={2} fill="none" />
+          ) : (
+            <path d="M20,20 l10,0 M50,20 l10,0" stroke={COL.textDim2} strokeWidth={2} />
+          )}
+          <rect x={-16} y={15} width={10} height={14} fill={COL.panel2} stroke={COL.textDim} strokeWidth={1.4} />
+          <line x1={-16} y1={15} x2={-6} y2={29} stroke={COL.textDim} strokeWidth={1} />
+          <rect x={82} y={15} width={10} height={14} fill={COL.panel2} stroke={COL.textDim} strokeWidth={1.4} />
+          <line x1={82} y1={15} x2={92} y2={29} stroke={COL.textDim} strokeWidth={1} />
+        </>
+      );
+    }
+    case "valve_pedal":
+      return (
+        <>
+          <rect x={4} y={2} width={52} height={40} rx={4} fill={sim.state === "actuated" ? "#2a3f2f" : COL.panel2} stroke={COL.line2} strokeWidth={1.4} />
+          <path d="M20,44 L20,0" stroke={COL.accent} strokeWidth={2} fill="none" />
+          <path d="M60,35 l10,0 l-5,10 Z" fill={COL.textDim} />
+        </>
+      );
+    case "valve_roller":
+      return (
+        <>
+          <rect x={4} y={2} width={52} height={40} rx={4} fill={sim.state === "actuated" ? "#2a3f2f" : COL.panel2} stroke={COL.line2} strokeWidth={1.4} />
+          <path d="M20,44 L20,0" stroke={COL.accent} strokeWidth={2} fill="none" />
+          <circle cx={-10} cy={10} r={6} fill="none" stroke={COL.textDim} strokeWidth={1.4} />
+        </>
+      );
+    case "solenoid_valve":
+      return (
+        <>
+          <rect x={4} y={2} width={52} height={40} rx={4} fill={sim.state === "actuated" ? "#2a3f2f" : COL.panel2} stroke={COL.line2} strokeWidth={1.4} />
+          <path d="M20,44 L20,0" stroke={COL.accent} strokeWidth={2} fill="none" />
+          <rect x={-16} y={10} width={12} height={24} fill={COL.panel2} stroke={COL.textDim} strokeWidth={1.4} />
+          <line x1={-16} y1={10} x2={-4} y2={34} stroke={COL.textDim} strokeWidth={1} />
+        </>
+      );
+    case "sequence_valve":
+      return (
+        <>
+          <rect x={0} y={0} width={50} height={40} fill={COL.panel2} stroke={COL.line2} strokeWidth={1.4} />
+          <path d="M0,20 L50,20" stroke={COL.textDim} strokeWidth={2} />
+          <path d="M25,10 L25,30 M20,15 L30,15" stroke={COL.textDim} strokeWidth={1.2} />
+        </>
+      );
+    case "vacuum_generator":
+      return (
+        <>
+          <rect x={0} y={0} width={50} height={40} fill={COL.panel2} stroke={COL.line2} strokeWidth={1.4} />
+          <path d="M0,10 L50,10 M25,10 L25,40" stroke={COL.textDim} strokeWidth={2} />
+          <path d="M20,30 l10,0 l-5,10 Z" fill={COL.textDim} transform="rotate(180, 25, 35)" />
+        </>
+      );
+    case "suction_cup":
+      return (
+        <>
+          <path d="M0,30 A20,20 0 0 1 40,30 L40,30 L0,30 Z" fill={COL.panel2} stroke={COL.textDim} strokeWidth={1.4} />
+          <line x1={20} y1={0} x2={20} y2={15} stroke={COL.textDim} strokeWidth={2} />
+        </>
+      );
     default:
       return null;
   }

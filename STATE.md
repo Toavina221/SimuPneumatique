@@ -267,3 +267,8 @@ Prochaines étapes : (1) vérifier le rendu du cyl-prop (barre proportionnelle) 
 16:40 — Vercel OK : simu-pneumatique.vercel.app affiche PneumaSim (landing + /editeur + /exercice). Root cause résolue : commentaire dans vercel.json (remplacé par JSON strict). Utilisateur passe à AdSense.
 16:42 — AdSense intégré : client ca-pub-7281717868974793 dans client/index.html, client/public/ads.txt créé.
 16:45 — AdSense IDs réels appliqués dans Home.tsx + Workbench.tsx (data-ad-slot vide = slot sans nom, annonce adaptative).
+16:55 — Site Vercel réparé par l'utilisateur. AdSense script et ads.txt vérifiés en ligne.
+17:05 — SEO : robots.txt et sitemap.xml créés dans client/public/ pour Google Search Console.
+17:10 — SEO : robots.txt et sitemap.xml vérifiés en ligne.
+17:20 — Bibliothèque enrichie : 12 nouveaux composants ISO 1219 (total 37) incluant FRL, Venturi, vérin sans tige, distributeurs 4/2, 4/3, etc. Logique de simulation et rendus SVG intégrés.
+17:45 — Bibliothèque, Oscilloscope et Mode Diagnostic implémentés.

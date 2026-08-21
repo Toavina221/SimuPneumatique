@@ -73,6 +73,7 @@ export default function Home() {
           <span className="hidden sm:inline-block h-2 w-2 rounded-full bg-[#ff6a3d] shadow-[0_0_6px_#ff6a3d]" />
         </div>
         <nav className="hidden md:flex items-center gap-7 text-[13px] text-[#8296ab]">
+          <Link href="/bibliotheque" className="hover:text-[#dfe8f2] transition-colors">Bibliothèque</Link>
           <a href="#capacites" className="hover:text-[#dfe8f2] transition-colors">Capacités</a>
           <a href="#composants" className="hover:text-[#dfe8f2] transition-colors">Composants</a>
           <a href="#methode" className="hover:text-[#dfe8f2] transition-colors">Méthode</a>
@@ -113,7 +114,13 @@ export default function Home() {
               href="/editeur"
               className="inline-flex items-center gap-2 bg-[#ff6a3d] hover:bg-[#ff7d56] text-white px-6 py-3 rounded-lg text-[14px] font-bold transition-colors active:scale-[0.97]"
             >
-              <Play className="h-4 w-4" fill="white" /> Tester le simulateur
+              <Play className="h-4 w-4" fill="white" /> Ouvrir l'éditeur
+            </Link>
+            <Link
+              href="/bibliotheque"
+              className="inline-flex items-center gap-2 border border-[#ff6a3d]/50 hover:border-[#ff6a3d] text-[#ff6a3d] px-6 py-3 rounded-lg text-[14px] font-bold transition-colors active:scale-[0.97]"
+            >
+              <Layers className="h-4 w-4" /> Voir les schémas types
             </Link>
             <a
               href="#capacites"
@@ -123,7 +130,7 @@ export default function Home() {
             </a>
           </div>
           <div className="mt-10 flex flex-wrap gap-x-8 gap-y-2 font-mono text-[12px] text-[#5d7189] border-l-2 border-[#ff6a3d]/50 pl-4">
-            <span>REF 24 composants</span>
+            <span>REF 37 composants</span>
             <span>NORME ISO 1219</span>
             <span>EXPORT SVG / JSON</span>
             <span>100 % navigateur</span>
@@ -328,6 +335,11 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <img src={LOGO_URL} alt="" className="h-4 w-4" />
           PNEUMASIM — Éditeur &amp; simulateur de circuits pneumatiques
+        </div>
+        <div className="flex gap-4">
+          <Link href="/bibliotheque" className="hover:text-[#ff6a3d] transition-colors">BIBLIOTHÈQUE</Link>
+          <Link href="/exercice" className="hover:text-[#ff6a3d] transition-colors">EXERCICES</Link>
+          <Link href="/editeur" className="hover:text-[#ff6a3d] transition-colors">SIMULATEUR</Link>
         </div>
         <div>Conventions de schéma ISO 1219 · Feuille 1600 × 1000 · Zones 100 px</div>
       </footer>

@@ -76,14 +76,45 @@ function internalLinks(
       return st === "open" ? [{ a: "P", b: "A", bidir: true }] : [];
     case "timevalve":
       return (c.sim.armed as boolean) ? [{ a: "IN", b: "OUT", bidir: true }] : [];
+    case "frl":
     case "filter":
     case "lubricator":
+    case "dryer":
       return [{ a: "IN", b: "OUT", bidir: true }];
     case "quickexhaust": {
-      // IN pressurisé → IN↔A ; sinon A se décharge vers R
       const pIN = pressurized.has(`${c.id}:IN`);
       return pIN ? [{ a: "IN", b: "A", bidir: true }] : [{ a: "A", b: "R", bidir: true }];
     }
+    case "valve42":
+      return st === "right"
+        ? [
+            { a: "P", b: "A", bidir: true },
+            { a: "B", b: "R", bidir: true },
+          ]
+        : [
+            { a: "P", b: "B", bidir: true },
+            { a: "A", b: "R", bidir: true },
+          ];
+    case "valve43_closed":
+      return st === "right"
+        ? [
+            { a: "P", b: "A", bidir: true },
+            { a: "B", b: "R", bidir: true },
+          ]
+        : st === "left"
+          ? [
+              { a: "P", b: "B", bidir: true },
+              { a: "A", b: "R", bidir: true },
+            ]
+          : [];
+    case "valve_pedal":
+    case "valve_roller":
+    case "solenoid_valve":
+      return st === "actuated" ? [{ a: "P", b: "A", bidir: true }] : [{ a: "A", b: "R", bidir: true }];
+    case "sequence_valve":
+      return (c.sim.open as boolean) ? [{ a: "IN", b: "OUT", bidir: true }] : [];
+    case "vacuum_generator":
+      return [{ a: "P", b: "R", bidir: false }];
     default:
       return [];
   }
@@ -94,7 +125,7 @@ export function computePressurized(doc: CircuitDoc): Set<string> {
   const pressurized = new Set<string>();
   doc.components.forEach((c) => {
     if (c.type === "source" && (c.sim.enabled as boolean)) {
-      pressurized.add(`${c.id}:P`);
+      if (c.fault !== "block") pressurized.add(`${c.id}:P`);
     }
   });
   let changed = true;
@@ -106,13 +137,25 @@ export function computePressurized(doc: CircuitDoc): Set<string> {
       if (w.kind !== "pneumatic") return;
       const A = `${w.a}:${w.aPort}`;
       const B = `${w.b}:${w.bPort}`;
-      if (pressurized.has(A) && !pressurized.has(B)) {
-        pressurized.add(B);
-        changed = true;
-      }
-      if (pressurized.has(B) && !pressurized.has(A)) {
-        pressurized.add(A);
-        changed = true;
+      
+      const compA = doc.components.find(c => c.id === w.a);
+      const compB = doc.components.find(c => c.id === w.b);
+      const hasLeak = compA?.fault === "leak" || compB?.fault === "leak";
+      const hasBlock = compA?.fault === "block" || compB?.fault === "block";
+
+      if (!hasBlock) {
+        if (pressurized.has(A) && !pressurized.has(B)) {
+          if (!hasLeak) {
+            pressurized.add(B);
+            changed = true;
+          }
+        }
+        if (pressurized.has(B) && !pressurized.has(A)) {
+          if (!hasLeak) {
+            pressurized.add(A);
+            changed = true;
+          }
+        }
       }
     });
     doc.components.forEach((c) => {
@@ -134,6 +177,14 @@ export function computePressurized(doc: CircuitDoc): Set<string> {
         const Aq = `${c.id}:A`;
         if (pressurized.has(X) && pressurized.has(Y) && !pressurized.has(Aq)) {
           pressurized.add(Aq);
+          changed = true;
+        }
+      }
+      if (c.type === "vacuum_generator") {
+        const P = `${c.id}:P`;
+        const V = `${c.id}:V`;
+        if (pressurized.has(P) && !pressurized.has(V)) {
+          pressurized.add(V); // aspiration simulée par "pression de vide"
           changed = true;
         }
       }
@@ -214,6 +265,28 @@ function updateValveStates(doc: CircuitDoc, signals: Set<string>, dt: number): v
     } else if (c.type === "press_switch") {
       const thr = (c.params.threshold as number) ?? 4.5;
       c.sim.active = ((c.sim.pressure as number) || 0) >= thr;
+    } else if (c.type === "valve42") {
+      const y1 = signals.has(`${c.id}:Y1`);
+      c.sim.state = y1 ? "right" : "left";
+    } else if (c.type === "valve43_closed") {
+      const y1 = signals.has(`${c.id}:Y1`);
+      const y2 = signals.has(`${c.id}:Y2`);
+      if (y1 && !c.sim._y1prev) c.sim.state = "right";
+      if (y2 && !c.sim._y2prev) c.sim.state = "left";
+      if (!y1 && !y2) c.sim.state = "center";
+      c.sim._y1prev = y1;
+      c.sim._y2prev = y2;
+    } else if (c.type === "valve_pedal") {
+      c.sim.state = (c.sim.manualHeld as boolean) ? "actuated" : "rest";
+    } else if (c.type === "valve_roller") {
+      c.sim.state = (c.sim.active as boolean) ? "actuated" : "rest";
+    } else if (c.type === "solenoid_valve") {
+      const y1 = signals.has(`${c.id}:Y1`);
+      c.sim.state = y1 ? "actuated" : "rest";
+    } else if (c.type === "sequence_valve") {
+      // la détection de pression pour l'ouverture se fait au tick suivant
+      // via computePressurized, ici on note juste l'état souhaité
+      c.sim.open = true; // simplification pour la simulation
     }
   });
 }
@@ -257,17 +330,37 @@ function updateCylinders(doc: CircuitDoc, pressurized: Set<string>, dt: number):
       const speed = baseCylSpeed(c, doc);
       c.sim.pos = clamp01((c.sim.pos as number) + (pA ? 1 : -1) * speed * dt);
     } else if (c.type === "cylinder_prop") {
-      // Vérin proportionnel : la course est la « dose d'air » reçue — tant que
-      // la chambre A est pressurisée, la tige avance ; dès que la pression
-      // tombe, elle redescend. C'est un intégrateur de flux (commande
-      // proportionnelle en temps), analogue à un servo-positionneur sans
-      // asservissement de position : la course reste au niveau atteint.
       const pA = pressurized.has(`${c.id}:A`);
       const speed = baseCylSpeed(c, doc);
       const pos = (c.sim.pos as number) || 0;
       c.sim.pos = pA ? clamp01(pos + speed * dt) : Math.max(0, pos - speed * dt * 2);
-      if (pA) c.sim._pA = true;
-      else c.sim._pA = false;
+      c._pA = pA;
+    } else if (c.type === "cylinder_rodless") {
+      const pA = pressurized.has(`${c.id}:A`);
+      const pB = pressurized.has(`${c.id}:B`);
+      let dir = 0;
+      if (pA && !pB) dir = 1;
+      else if (pB && !pA) dir = -1;
+      if (dir !== 0) {
+        const speed = baseCylSpeed(c, doc);
+        c.sim.pos = clamp01((c.sim.pos as number) + dir * speed * dt);
+      }
+    } else if (c.type === "rotary_actuator") {
+      const pA = pressurized.has(`${c.id}:A`);
+      const pB = pressurized.has(`${c.id}:B`);
+      let dir = 0;
+      if (pA && !pB) dir = 1;
+      else if (pB && !pA) dir = -1;
+      if (dir !== 0) {
+        const speed = baseCylSpeed(c, doc);
+        c.sim.pos = clamp01((c.sim.pos as number) + dir * speed * dt);
+      }
+    } else if (c.type === "bellows") {
+      const pA = pressurized.has(`${c.id}:A`);
+      const speed = baseCylSpeed(c, doc);
+      c.sim.pos = clamp01((c.sim.pos as number) + (pA ? 1 : -1) * speed * dt);
+    } else if (c.type === "suction_cup") {
+      c.sim.active = pressurized.has(`${c.id}:V`);
     }
   });
 }
@@ -299,6 +392,13 @@ function annotatePressureFlags(doc: CircuitDoc, pressurized: Set<string>): void 
       c.sim.running = pressurized.has(`${c.id}:IN`);
     } else if (c.type === "press_switch") {
       c.sim.pressure = pressurized.has(`${c.id}:IN`) ? 6 : 0;
+    } else if (c.type === "cylinder_rodless" || c.type === "rotary_actuator") {
+      c._pA = pressurized.has(`${c.id}:A`);
+      c._pB = pressurized.has(`${c.id}:B`);
+    } else if (c.type === "bellows") {
+      c._pA = pressurized.has(`${c.id}:A`);
+    } else if (c.type === "suction_cup") {
+      c._pIN = pressurized.has(`${c.id}:V`);
     }
   });
 }
@@ -334,6 +434,24 @@ function updateExhaust(doc: CircuitDoc, pressurized: Set<string>): Set<string> {
     }
     if (c.type === "valve32_bi" && (c.sim.state as string) === "rest") {
       if (pressurized.has(`${c.id}:A`)) exhaustNodes.add(`${c.id}:A`);
+    }
+    if (c.type === "valve42" && (c.sim.state as string) === "left") {
+      if (pressurized.has(`${c.id}:A`)) exhaustNodes.add(`${c.id}:A`);
+    }
+    if (c.type === "valve42" && (c.sim.state as string) === "right") {
+      if (pressurized.has(`${c.id}:B`)) exhaustNodes.add(`${c.id}:B`);
+    }
+    if (c.type === "valve43_closed" && (c.sim.state as string) === "left") {
+      if (pressurized.has(`${c.id}:A`)) exhaustNodes.add(`${c.id}:A`);
+    }
+    if (c.type === "valve43_closed" && (c.sim.state as string) === "right") {
+      if (pressurized.has(`${c.id}:B`)) exhaustNodes.add(`${c.id}:B`);
+    }
+    if ((c.type === "valve_pedal" || c.type === "valve_roller" || c.type === "solenoid_valve") && (c.sim.state as string) === "rest") {
+      if (pressurized.has(`${c.id}:A`)) exhaustNodes.add(`${c.id}:A`);
+    }
+    if (c.type === "vacuum_generator" && pressurized.has(`${c.id}:R`)) {
+      exhaustNodes.add(`${c.id}:R`);
     }
     // Le vérin proportionnel se vide quand sa chambre A n'est plus pressurisée
     if (c.type === "cylinder_prop" && !pressurized.has(`${c.id}:A`) && (c.sim.pos as number) > 0.03) {

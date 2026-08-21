@@ -448,6 +448,233 @@ export const COMP_DEFS: Record<string, CompDef> = {
       return {};
     },
   },
+
+  frl: {
+    label: "Unité FRL (Filtre-Régul-Lub)",
+    doc: "Unité complète de conditionnement : filtre les impuretés, régule la pression de service et lubrifie l'air pour protéger les composants.",
+    cat: "Conditionnement",
+    prefix: "Z",
+    w: 80,
+    h: 40,
+    ports: [
+      { id: "IN", x: 0, y: 20, kind: "pneu", dir: "in" },
+      { id: "OUT", x: 80, y: 20, kind: "pneu", dir: "out" },
+    ],
+    defaultParams: { pressure: 6 },
+    initSim() {
+      return {};
+    },
+  },
+
+  dryer: {
+    label: "Sécheur d'air",
+    doc: "Élimine l'humidité résiduelle de l'air comprimé pour éviter la corrosion et le gel dans les conduites.",
+    cat: "Conditionnement",
+    prefix: "D",
+    w: 40,
+    h: 40,
+    ports: [
+      { id: "IN", x: 0, y: 20, kind: "pneu", dir: "in" },
+      { id: "OUT", x: 40, y: 20, kind: "pneu", dir: "out" },
+    ],
+    defaultParams: {},
+    initSim() {
+      return {};
+    },
+  },
+
+  cylinder_rodless: {
+    label: "Vérin sans tige",
+    doc: "Actionneur linéaire compact : le chariot se déplace le long du corps du vérin. Idéal pour les courses longues et les espaces réduits.",
+    cat: "Actionneurs",
+    prefix: "A",
+    w: 160,
+    h: 30,
+    ports: [
+      { id: "A", x: 10, y: 30, kind: "pneu", dir: "in" },
+      { id: "B", x: 150, y: 30, kind: "pneu", dir: "in" },
+    ],
+    defaultParams: { strokeTime: 3 },
+    initSim() {
+      return { pos: 0.5 };
+    },
+  },
+
+  rotary_actuator: {
+    label: "Actionneur rotatif",
+    doc: "Transforme l'énergie pneumatique en mouvement de rotation (souvent 90° ou 180°). Utilisé pour le pivotement de charges.",
+    cat: "Actionneurs",
+    prefix: "M",
+    w: 60,
+    h: 60,
+    ports: [
+      { id: "A", x: 0, y: 45, kind: "pneu", dir: "in" },
+      { id: "B", x: 60, y: 45, kind: "pneu", dir: "in" },
+    ],
+    defaultParams: { strokeTime: 1.5 },
+    initSim() {
+      return { pos: 0 };
+    },
+  },
+
+  bellows: {
+    label: "Soufflet pneumatique",
+    doc: "Actionneur à simple effet : se gonfle sous pression pour exercer une force importante sur une course courte. Utilisé pour le levage ou l'amortissement.",
+    cat: "Actionneurs",
+    prefix: "A",
+    w: 60,
+    h: 50,
+    ports: [{ id: "A", x: 30, y: 50, kind: "pneu", dir: "in" }],
+    defaultParams: { strokeTime: 1 },
+    initSim() {
+      return { pos: 0 };
+    },
+  },
+
+  valve42: {
+    label: "Distributeur 4/2",
+    doc: "4 orifices, 2 positions : permet d'inverser le sens de mouvement d'un vérin double effet avec un seul pilotage.",
+    cat: "Distributeurs",
+    prefix: "V",
+    w: 60,
+    h: 44,
+    ports: [
+      { id: "P", x: 15, y: 44, kind: "pneu", dir: "io" },
+      { id: "R", x: 45, y: 44, kind: "pneu", dir: "io" },
+      { id: "A", x: 15, y: 0, kind: "pneu", dir: "io" },
+      { id: "B", x: 45, y: 0, kind: "pneu", dir: "io" },
+      { id: "Y1", x: -8, y: 22, kind: "signal", dir: "in" },
+    ],
+    defaultParams: {},
+    initSim() {
+      return { state: "left" };
+    },
+  },
+
+  valve43_closed: {
+    label: "Distributeur 4/3 (centre fermé)",
+    doc: "4 orifices, 3 positions : en position centrale, tous les orifices sont fermés, bloquant l'actionneur.",
+    cat: "Distributeurs",
+    prefix: "V",
+    w: 80,
+    h: 44,
+    ports: [
+      { id: "P", x: 25, y: 44, kind: "pneu", dir: "io" },
+      { id: "R", x: 55, y: 44, kind: "pneu", dir: "io" },
+      { id: "A", x: 25, y: 0, kind: "pneu", dir: "io" },
+      { id: "B", x: 55, y: 0, kind: "pneu", dir: "io" },
+      { id: "Y1", x: -8, y: 22, kind: "signal", dir: "in" },
+      { id: "Y2", x: 88, y: 22, kind: "signal", dir: "in" },
+    ],
+    defaultParams: {},
+    initSim() {
+      return { state: "center", _y1prev: false, _y2prev: false };
+    },
+  },
+
+  valve_pedal: {
+    label: "Vanne 3/2 à pédale",
+    doc: "Distributeur 3/2 actionné par pédale au pied. Utilisé pour libérer les mains de l'opérateur.",
+    cat: "Distributeurs",
+    prefix: "V",
+    w: 60,
+    h: 44,
+    ports: [
+      { id: "P", x: 20, y: 44, kind: "pneu", dir: "io" },
+      { id: "A", x: 20, y: 0, kind: "pneu", dir: "io" },
+      { id: "R", x: 46, y: 44, kind: "pneu", dir: "io" },
+    ],
+    defaultParams: {},
+    initSim() {
+      return { state: "rest", manualHeld: false };
+    },
+  },
+
+  valve_roller: {
+    label: "Vanne 3/2 à galet",
+    doc: "Distributeur 3/2 actionné mécaniquement par le passage d'une came ou d'un vérin. Utilisé comme fin de course mécanique.",
+    cat: "Distributeurs",
+    prefix: "V",
+    w: 60,
+    h: 44,
+    ports: [
+      { id: "P", x: 20, y: 44, kind: "pneu", dir: "io" },
+      { id: "A", x: 20, y: 0, kind: "pneu", dir: "io" },
+      { id: "R", x: 46, y: 44, kind: "pneu", dir: "io" },
+    ],
+    defaultParams: { targetId: "", position: "extended" },
+    initSim() {
+      return { state: "rest", active: false };
+    },
+  },
+
+  solenoid_valve: {
+    label: "Électrovanne 3/2",
+    doc: "Distributeur 3/2 actionné par un signal électrique (simulé ici par un signal de pilotage).",
+    cat: "Distributeurs",
+    prefix: "V",
+    w: 60,
+    h: 44,
+    ports: [
+      { id: "P", x: 20, y: 44, kind: "pneu", dir: "io" },
+      { id: "A", x: 20, y: 0, kind: "pneu", dir: "io" },
+      { id: "R", x: 46, y: 44, kind: "pneu", dir: "io" },
+      { id: "Y1", x: -8, y: 22, kind: "signal", dir: "in" },
+    ],
+    defaultParams: {},
+    initSim() {
+      return { state: "rest", _y1prev: false };
+    },
+  },
+
+  sequence_valve: {
+    label: "Soupape de séquence",
+    doc: "Ne laisse passer l'air vers OUT que lorsque la pression en IN dépasse un certain seuil. Utilisé pour déclencher des actions en cascade.",
+    cat: "Régulation",
+    prefix: "V",
+    w: 50,
+    h: 40,
+    ports: [
+      { id: "IN", x: 0, y: 20, kind: "pneu", dir: "in" },
+      { id: "OUT", x: 50, y: 20, kind: "pneu", dir: "out" },
+    ],
+    defaultParams: { threshold: 4 },
+    initSim() {
+      return { open: false };
+    },
+  },
+
+  vacuum_generator: {
+    label: "Générateur de vide (Venturi)",
+    doc: "Transforme le passage de l'air comprimé de P vers R en une aspiration (vide) sur le port V par effet Venturi.",
+    cat: "Vannes",
+    prefix: "V",
+    w: 50,
+    h: 40,
+    ports: [
+      { id: "P", x: 0, y: 10, kind: "pneu", dir: "in" },
+      { id: "R", x: 50, y: 10, kind: "pneu", dir: "out" },
+      { id: "V", x: 25, y: 40, kind: "pneu", dir: "io" },
+    ],
+    defaultParams: {},
+    initSim() {
+      return { vacuum: false };
+    },
+  },
+
+  suction_cup: {
+    label: "Ventouse",
+    doc: "Utilise le vide pour saisir des pièces. S'active lorsqu'une dépression est présente sur le port V.",
+    cat: "Actionneurs",
+    prefix: "A",
+    w: 40,
+    h: 30,
+    ports: [{ id: "V", x: 20, y: 0, kind: "pneu", dir: "in" }],
+    defaultParams: {},
+    initSim() {
+      return { active: false };
+    },
+  },
 };
 
 export const COLLECTION_TREE = {
@@ -457,18 +684,18 @@ export const COLLECTION_TREE = {
       label: "Alimentation",
       children: [
         { label: "Source", items: ["source", "reservoir"] },
-        { label: "Conditionnement", items: ["filter", "lubricator"] },
+        { label: "Conditionnement", items: ["frl", "filter", "lubricator", "dryer"] },
       ],
     },
     {
       label: "Vannes",
       children: [
-        { label: "Distributeurs", items: ["valve22", "valve32", "valve32_bi", "valve52_mono", "valve52_bi", "valve53_closed", "valve53_open", "timevalve"] },
-        { label: "Vannes logiques", items: ["shuttle", "dualpressure", "quickexhaust"] },
-        { label: "Vannes de régulation", items: ["flowcontrol", "checkvalve"] },
+        { label: "Distributeurs", items: ["valve22", "valve32", "valve42", "valve43_closed", "valve52_mono", "valve52_bi", "valve53_closed", "valve53_open", "valve32_bi", "solenoid_valve", "valve_pedal", "valve_roller", "timevalve"] },
+        { label: "Vannes logiques", items: ["shuttle", "dualpressure", "quickexhaust", "vacuum_generator"] },
+        { label: "Vannes de régulation", items: ["flowcontrol", "checkvalve", "sequence_valve"] },
       ],
     },
-    { label: "Actionneurs", children: [{ label: "linéaire & rotatif", items: ["cylinder_double", "cylinder_single", "cylinder_prop", "motor"] }] },
+    { label: "Actionneurs", children: [{ label: "linéaire & rotatif", items: ["cylinder_double", "cylinder_single", "cylinder_rodless", "cylinder_prop", "rotary_actuator", "motor", "bellows", "suction_cup"] }] },
     {
       label: "Capteurs",
       children: [{ label: "Position & pression", items: ["sensor", "press_switch"] }],

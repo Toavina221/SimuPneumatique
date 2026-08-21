@@ -572,6 +572,12 @@ export default function SheetCanvas(props: Props) {
                   />
                 )}
                 <CompSymbol comp={comp} />
+                {comp.fault && (
+                  <g transform={`translate(${def.w - 10}, 0)`}>
+                    <circle r="7" fill="#ff5d5d" stroke="#0d1219" strokeWidth="1" />
+                    <text y="3.5" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" fontFamily="monospace">!</text>
+                  </g>
+                )}
                 {def.ports.map((p) => (
                   <circle
                     key={p.id}

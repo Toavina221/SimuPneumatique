@@ -26,6 +26,8 @@ import {
   RotateCcw,
   Save,
   Trash2,
+  Activity,
+  AlertTriangle,
 } from "lucide-react";
 import { downloadJson, downloadSvg, readJsonFile } from "@/lib/pneusim/io";
 import { COMP_DEFS } from "@/lib/pneusim/defs";
@@ -54,6 +56,9 @@ interface Props {
   onGetComponents: () => Component[];
   onSetView: (v: { x: number; y: number; w: number; h: number }) => void;
   onOpenCartoucheModal: (field: keyof Cartouche) => void;
+  onToggleGraph: () => void;
+  showGraph: boolean;
+  onDiagnostic: () => void;
 }
 
 interface Favorite {
@@ -101,6 +106,9 @@ export default function Toolbar(props: Props) {
     onLoadDoc,
     onGetDoc,
     onOpenCartoucheModal,
+    onToggleGraph,
+    showGraph,
+    onDiagnostic,
   } = props;
   const fileRef = useRef<HTMLInputElement>(null);
   const [favorites, setFavorites] = useState<Favorite[]>(loadFavorites);
@@ -273,6 +281,23 @@ export default function Toolbar(props: Props) {
         className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#2c6aa3]"
         >
         <Plus className="h-3.5 w-3.5" />
+      </button>
+      <span className="w-px h-[22px] bg-[#2f3f4f] mx-1" />
+      <button
+        type="button"
+        onClick={onToggleGraph}
+        className={`bg-[#1a2432] border border-[#2f3f4f] px-2.5 py-1.5 rounded-md text-[12.5px] transition-colors flex items-center gap-1.5 active:scale-[0.97] ${
+          showGraph ? "text-[#ff6a3d] border-[#ff6a3d] bg-[#ff6a3d]/10" : "text-[#dfe8f2] hover:bg-[#20303f] hover:border-[#2c6aa3]"
+        }`}
+      >
+        <Activity className="h-3.5 w-3.5" /> Oscillo
+      </button>
+      <button
+        type="button"
+        onClick={onDiagnostic}
+        className="bg-[#1a2432] border border-[#2f3f4f] text-[#dfe8f2] px-2.5 py-1.5 rounded-md text-[12.5px] hover:bg-[#20303f] hover:border-[#ff5d5d] hover:text-[#ff5d5d] flex items-center gap-1.5"
+      >
+        <AlertTriangle className="h-3.5 w-3.5" /> Diagnostic
       </button>
       <span className="w-px h-[22px] bg-[#2f3f4f] mx-1" />
       <button

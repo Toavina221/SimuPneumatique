@@ -25,7 +25,7 @@ export function makeTimerExample(): CircuitDoc {
       { id: "t_P1", type: "source", x: 150, y: 300, rot: 0, num: "P1", params: {}, sim: { enabled: true } },
       { id: "t_V1", type: "valve32", x: 380, y: 300, rot: 0, num: "V1", params: {}, sim: { state: "rest" } },
       { id: "t_T1", type: "timevalve", x: 620, y: 300, rot: 0, num: "T1", params: { delay: 2.0 }, sim: { armed: false, elapsed: 0 } },
-      { id: "t_A1", type: "cylinder_double", x: 860, y: 300, rot: 0, num: "A1", params: { strokeTime: 1.5 } as Record<string, string | number>, sim: { pos: 0 } },
+      { id: "t_A1", type: "cylinder_double", x: 860, y: 300, rot: 0, num: "A1", params: { strokeTime: 1.5 } as Record<string, string | number> as Record<string, string | number>, sim: { pos: 0 } },
     ],
     wires: [
       { id: "t_w1", kind: "pneumatic", a: "t_P1", aPort: "P", b: "t_V1", bPort: "P" },
@@ -141,6 +141,84 @@ export const EXAMPLES: Example[] = [
     description:
       "Au relâchement, la 5/3 centre ses cases (P, A et B fermés) : le vérin reste figé en position intermédiaire.",
     doc: makeValve53Example,
+  },
+  {
+    id: "sequence_ab",
+    label: "Séquence automatique A+ B+ A- B-",
+    description:
+      "Cycle complexe synchronisé par 4 capteurs : le vérin A sort, déclenche B, qui sort et déclenche le retour de A, puis de B.",
+    doc: () => ({
+      components: [
+        { id: "s_P1", type: "source", x: 100, y: 400, rot: 0, num: "P1", params: {}, sim: { enabled: true } },
+        { id: "s_V1", type: "valve52_bi", x: 300, y: 300, rot: 0, num: "V1", params: {}, sim: { state: "left" } },
+        { id: "s_V2", type: "valve52_bi", x: 500, y: 300, rot: 0, num: "V2", params: {}, sim: { state: "left" } },
+        { id: "s_A1", type: "cylinder_double", x: 300, y: 150, rot: 0, num: "A", params: { strokeTime: 1.5 } as Record<string, string | number>, sim: { pos: 0 } },
+        { id: "s_B1", type: "cylinder_double", x: 500, y: 150, rot: 0, num: "B", params: { strokeTime: 1.5 } as Record<string, string | number>, sim: { pos: 0 } },
+        { id: "s_S1", type: "sensor", x: 300, y: 220, rot: 0, num: "a0", params: { targetId: "s_A1", position: "retracted" } as Record<string, string | number>, sim: { active: false } },
+        { id: "s_S2", type: "sensor", x: 420, y: 220, rot: 0, num: "a1", params: { targetId: "s_A1", position: "extended" } as Record<string, string | number>, sim: { active: false } },
+        { id: "s_S3", type: "sensor", x: 500, y: 220, rot: 0, num: "b0", params: { targetId: "s_B1", position: "retracted" } as Record<string, string | number>, sim: { active: false } },
+        { id: "s_S4", type: "sensor", x: 620, y: 220, rot: 0, num: "b1", params: { targetId: "s_B1", position: "extended" } as Record<string, string | number>, sim: { active: false } },
+      ],
+      wires: [
+        { id: "s_w1", kind: "pneumatic", a: "s_P1", aPort: "P", b: "s_V1", bPort: "P" },
+        { id: "s_w2", kind: "pneumatic", a: "s_P1", aPort: "P", b: "s_V2", bPort: "P" },
+        { id: "s_w3", kind: "pneumatic", a: "s_V1", aPort: "A", b: "s_A1", bPort: "A" },
+        { id: "s_w4", kind: "pneumatic", a: "s_V1", aPort: "B", b: "s_A1", bPort: "B" },
+        { id: "s_w5", kind: "pneumatic", a: "s_V2", aPort: "A", b: "s_B1", bPort: "A" },
+        { id: "s_w6", kind: "pneumatic", a: "s_V2", aPort: "B", b: "s_B1", bPort: "B" },
+        { id: "s_w7", kind: "signal", a: "s_S1", aPort: "OUT", b: "s_V1", bPort: "Y1" },
+        { id: "s_w8", kind: "signal", a: "s_S2", aPort: "OUT", b: "s_V2", bPort: "Y1" },
+        { id: "s_w9", kind: "signal", a: "s_S4", aPort: "OUT", b: "s_V1", bPort: "Y2" },
+        { id: "s_w10", kind: "signal", a: "s_S3", aPort: "OUT", b: "s_V2", bPort: "Y2" },
+      ],
+      cartouche: { titre: "Séquence A+ B+ A- B-", auteur: "PneumaSim", date: "2026-08-21", folio: "1/1" },
+      counters: { c: 9, w: 10 },
+    }),
+  },
+  {
+    id: "vide_ventouse",
+    label: "Manipulation par le vide (Venturi)",
+    description:
+      "Un générateur de vide Venturi aspire l'air pour activer une ventouse. Idéal pour la préhension de pièces légères.",
+    doc: () => ({
+      components: [
+        { id: "v_P1", type: "source", x: 150, y: 300, rot: 0, num: "P1", params: {}, sim: { enabled: true } },
+        { id: "v_V1", type: "valve32", x: 350, y: 300, rot: 0, num: "V1", params: {}, sim: { state: "rest" } },
+        { id: "v_G1", type: "vacuum_generator", x: 550, y: 300, rot: 0, num: "G1", params: {}, sim: { vacuum: false } },
+        { id: "v_C1", type: "suction_cup", x: 550, y: 420, rot: 0, num: "C1", params: {}, sim: { active: false } },
+      ],
+      wires: [
+        { id: "v_w1", kind: "pneumatic", a: "v_P1", aPort: "P", b: "v_V1", bPort: "P" },
+        { id: "v_w2", kind: "pneumatic", a: "v_V1", aPort: "A", b: "v_G1", bPort: "P" },
+        { id: "v_w3", kind: "pneumatic", a: "v_G1", aPort: "V", b: "v_C1", bPort: "V" },
+      ],
+      cartouche: { titre: "Préhension par ventouse (Effet Venturi)", auteur: "PneumaSim", date: "2026-08-21", folio: "1/1" },
+      counters: { c: 4, w: 3 },
+    }),
+  },
+  {
+    id: "regul_vitesse",
+    label: "Régulation de vitesse bidirectionnelle",
+    description:
+      "Utilisation de régulateurs de débit unidirectionnels pour contrôler séparément la vitesse de sortie et de rentrée du vérin.",
+    doc: () => ({
+      components: [
+        { id: "r_P1", type: "source", x: 150, y: 400, rot: 0, num: "P1", params: {}, sim: { enabled: true } },
+        { id: "r_V1", type: "valve52_mono", x: 350, y: 350, rot: 0, num: "V1", params: {}, sim: { state: "left" } },
+        { id: "r_F1", type: "flowcontrol", x: 350, y: 200, rot: 90, num: "F1", params: { restriction: 20 } as Record<string, string | number>, sim: {} },
+        { id: "r_F2", type: "flowcontrol", x: 550, y: 200, rot: 90, num: "F2", params: { restriction: 50 } as Record<string, string | number>, sim: {} },
+        { id: "r_A1", type: "cylinder_double", x: 450, y: 50, rot: 0, num: "A1", params: { strokeTime: 1.5 } as Record<string, string | number>, sim: { pos: 0 } },
+      ],
+      wires: [
+        { id: "r_w1", kind: "pneumatic", a: "r_P1", aPort: "P", b: "r_V1", bPort: "P" },
+        { id: "r_w2", kind: "pneumatic", a: "r_V1", aPort: "A", b: "r_F1", bPort: "IN" },
+        { id: "r_w3", kind: "pneumatic", a: "r_F1", aPort: "OUT", b: "r_A1", bPort: "A" },
+        { id: "r_w4", kind: "pneumatic", a: "r_V1", aPort: "B", b: "r_F2", bPort: "IN" },
+        { id: "r_w5", kind: "pneumatic", a: "r_F2", aPort: "OUT", b: "r_A1", bPort: "B" },
+      ],
+      cartouche: { titre: "Contrôle de vitesse (Sortie 20%, Rentrée 50%)", auteur: "PneumaSim", date: "2026-08-21", folio: "1/1" },
+      counters: { c: 5, w: 5 },
+    }),
   },
 ];
 

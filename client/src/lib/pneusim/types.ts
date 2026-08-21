@@ -36,6 +36,7 @@ export interface Component {
   num: string;
   params: Record<string, number | string>;
   sim: Record<string, unknown>;
+  fault?: "leak" | "block" | null;
   // drapeaux pressurisés annotés à chaque tick pour le rendu
   _pA?: boolean;
   _pB?: boolean;
